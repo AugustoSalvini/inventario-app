@@ -7,23 +7,20 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            // Si ya existiera, evitamos colisión
-            if (!Schema::hasColumn('users', 'role')) {
-                $table->enum('role', ['admin', 'empleado', 'usuario'])
-                    ->default('usuario')
-                    ->after('password')
-                    ->index();
-            }
+        Schema::create('users', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->string('email')->unique();
+            $table->string('password');
+            // Rol incluido desde la creación (sin ALTER posterior)
+            $table->enum('role', ['admin','empleado','usuario'])->default('usuario')->index();
+            $table->rememberToken();
+            $table->timestamps();
         });
     }
 
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            if (Schema::hasColumn('users', 'role')) {
-                $table->dropColumn('role');
-            }
-        });
+        Schema::dropIfExists('users');
     }
 };
