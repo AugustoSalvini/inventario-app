@@ -1,8 +1,8 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
 import { AuthService } from './auth.service';
 
 @Component({
@@ -24,9 +24,16 @@ export class LoginComponent {
     this.error = '';
     this.loading = true;
     try {
-      // 👇 tu AuthService espera un objeto, no dos strings
-      await this.auth.login({ email: this.email, password: this.password });
-      this.router.navigateByUrl('/'); // o a donde quieras ir
+      // Convertimos el Observable en Promise
+      const res = await firstValueFrom(
+        this.auth.login({ email: this.email, password: this.password })
+      );
+
+      // Guardamos el token para que lo lea el interceptor
+      this.auth.token = res.token;
+
+      // Navegamos (ajustá la ruta si querés ir a otra)
+      this.router.navigateByUrl('/');
     } catch (e: any) {
       this.error = e?.error?.message || 'Error al iniciar sesión';
     } finally {
