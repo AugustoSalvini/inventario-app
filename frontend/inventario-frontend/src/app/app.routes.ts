@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { ProductosComponent } from './productos.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -15,4 +16,6 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./register').then(m => m.RegisterComponent),
   },
+
+  { path: 'productos', component: ProductosComponent },
 ];

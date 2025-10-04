@@ -22,10 +22,11 @@ Route::middleware(['auth:sanctum','role:admin,empleado'])
     // === PRODUCTOS ===
 // Listar / ver: admin y empleado
 // Crear/actualizar/eliminar/stock: sólo admin (puede cambiarlo a gusto)
-Route::middleware(['auth:sanctum','role:admin,empleado'])->group(function () {
+Route::middleware(['auth:sanctum','role:admin,empleado,usuario'])->group(function () {
     Route::get('/productos', [ProductoController::class, 'index']);
     Route::get('/productos/{producto}', [ProductoController::class, 'show']);
 });
+
 
 Route::middleware(['auth:sanctum','role:admin'])->group(function () {
     Route::post('/productos', [ProductoController::class, 'store']);
@@ -34,3 +35,16 @@ Route::middleware(['auth:sanctum','role:admin'])->group(function () {
     Route::delete('/productos/{producto}', [ProductoController::class, 'destroy']);
     Route::patch('/productos/{producto}/stock', [ProductoController::class, 'updateStock']);
 });
+// listar: admin, empleado, usuario
+Route::get('/productos', [ProductoController::class, 'index'])
+    ->middleware('role:admin,empleado,usuario');
+
+// crear / editar: admin, empleado
+Route::post('/productos', [ProductoController::class, 'store'])
+    ->middleware('role:admin,empleado');
+Route::put('/productos/{id}', [ProductoController::class, 'update'])
+    ->middleware('role:admin,empleado');
+
+// eliminar: solo admin
+Route::delete('/productos/{id}', [ProductoController::class, 'destroy'])
+    ->middleware('role:admin');

@@ -1,0 +1,25 @@
+<h2>Listado de Productos</h2>
+
+<div *ngIf="loading">Cargando...</div>
+<div *ngIf="!loading && error" style="color:red">{{ error }}</div>
+
+<table *ngIf="!loading && !error" border="1" cellpadding="6">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Nombre</th>
+      <th>Precio</th>
+      <th>Stock</th>
+      <th>Activo</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let p of productos">
+      <td>{{ p.id }}</td>
+      <td>{{ p.nombre }}</td>
+      <td>{{ p.precio }}</td>
+      <td>{{ p.stock }}</td>
+      <td>{{ p.activo ? 'Sí' : 'No' }}</td>
+    </tr>
+  </tbody>
+</table>
