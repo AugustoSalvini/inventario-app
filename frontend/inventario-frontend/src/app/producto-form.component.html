@@ -1,0 +1,36 @@
+<div class="container py-3" [class.opacity-50]="loading">
+  <h4 class="mb-3">{{ id ? 'Editar' : 'Nuevo' }} producto</h4>
+  <form [formGroup]="form" (ngSubmit)="submit()" class="row g-3">
+    <div class="col-md-4">
+      <label class="form-label">Código</label>
+      <input class="form-control" formControlName="codigo">
+    </div>
+    <div class="col-md-8">
+      <label class="form-label">Nombre *</label>
+      <input class="form-control" formControlName="nombre" required>
+    </div>
+    <div class="col-12">
+      <label class="form-label">Descripción</label>
+      <textarea class="form-control" rows="2" formControlName="descripcion"></textarea>
+    </div>
+    <div class="col-md-4">
+      <label class="form-label">Precio *</label>
+      <input type="number" class="form-control" formControlName="precio">
+    </div>
+    <div class="col-md-4">
+      <label class="form-label">Stock *</label>
+      <input type="number" class="form-control" formControlName="stock">
+    </div>
+    <div class="col-md-4 d-flex align-items-end">
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" id="activo" formControlName="activo">
+        <label class="form-check-label" for="activo">Activo</label>
+      </div>
+    </div>
+
+    <div class="col-12 d-flex gap-2">
+      <button class="btn btn-primary" [disabled]="loading">Guardar</button>
+      <a class="btn btn-outline-secondary" [routerLink]="['/productos']">Cancelar</a>
+    </div>
+  </form>
+</div>

@@ -30,7 +30,7 @@ export class LoginComponent {
       );
 
       // Guardamos el token para que lo lea el interceptor
-      this.auth.token = res.token;
+      this.auth.token = res.access_token;
 
       // Navegamos (ajustá la ruta si querés ir a otra)
       this.router.navigateByUrl('/');

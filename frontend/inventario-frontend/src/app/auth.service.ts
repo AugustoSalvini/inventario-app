@@ -19,11 +19,11 @@ export class AuthService {
   }
 
   login(body: LoginBody) {
-    return this.http.post<{ user: any; token: string }>(`${this.api}/login`, body);
+    return this.http.post<{ user: any; access_token: string }>(`${this.api}/login`, body);
   }
 
   register(body: RegisterBody) {
-    return this.http.post<{ user: any; token: string }>(`${this.api}/register`, body);
+    return this.http.post<{ user: any; access_token: string }>(`${this.api}/register`, body);
   }
 
   me() {

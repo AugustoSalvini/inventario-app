@@ -1,25 +1,46 @@
-<h2>Listado de Productos</h2>
+<div class="container py-3">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h4>Productos</h4>
+    <button *ngIf="auth.roleIn(['admin','empleado'])"
+            class="btn btn-primary" (click)="nuevo()">Nuevo producto</button>
+  </div>
 
-<div *ngIf="loading">Cargando...</div>
-<div *ngIf="!loading && error" style="color:red">{{ error }}</div>
+  <div class="input-group mb-3">
+    <input class="form-control" placeholder="Buscar..." [(ngModel)]="q" (keyup.enter)="fetch()">
+    <button class="btn btn-outline-secondary" (click)="fetch()">Buscar</button>
+  </div>
 
-<table *ngIf="!loading && !error" border="1" cellpadding="6">
-  <thead>
-    <tr>
-      <th>ID</th>
-      <th>Nombre</th>
-      <th>Precio</th>
-      <th>Stock</th>
-      <th>Activo</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr *ngFor="let p of productos">
-      <td>{{ p.id }}</td>
-      <td>{{ p.nombre }}</td>
-      <td>{{ p.precio }}</td>
-      <td>{{ p.stock }}</td>
-      <td>{{ p.activo ? 'Sí' : 'No' }}</td>
-    </tr>
-  </tbody>
-</table>
+  <div *ngIf="loading">Cargando...</div>
+  <div *ngIf="!loading && data.length === 0" class="text-muted">Sin resultados</div>
+
+  <div class="table-responsive" *ngIf="!loading && data.length">
+    <table class="table table-sm align-middle">
+      <thead>
+        <tr>
+          <th>Código</th><th>Nombre</th><th class="text-end">Precio</th><th class="text-end">Stock</th><th>Activo</th><th class="text-end">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let p of data">
+          <td>{{ p.codigo || '-' }}</td>
+          <td>{{ p.nombre }}</td>
+          <td class="text-end">{{ p.precio | number:'1.2-2' }}</td>
+          <td class="text-end">{{ p.stock }}</td>
+          <td>
+            <span class="badge" [class.text-bg-success]="p.activo" [class.text-bg-secondary]="!p.activo">
+              {{ p.activo ? 'Sí' : 'No' }}
+            </span>
+          </td>
+          <td class="text-end">
+            <button class="btn btn-sm btn-outline-secondary me-1"
+                    (click)="actualizarStock(p)" *ngIf="auth.roleIn(['admin','empleado'])">Stock</button>
+            <button class="btn btn-sm btn-outline-primary me-1"
+                    (click)="editar(p)" *ngIf="auth.roleIn(['admin','empleado'])">Editar</button>
+            <button class="btn btn-sm btn-outline-danger"
+                    (click)="eliminar(p)" *ngIf="auth.roleIn(['admin'])">Eliminar</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
