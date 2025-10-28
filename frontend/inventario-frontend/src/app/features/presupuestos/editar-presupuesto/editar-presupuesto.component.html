@@ -1,0 +1,25 @@
+<div class="box">
+  <h2>Nuevo / Editar Presupuesto</h2>
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <label>Cliente ID*</label>
+    <input formControlName="cliente_id" type="number">
+    <label>Fecha</label>
+    <input formControlName="fecha" type="date">
+    <label>Estado</label>
+    <select formControlName="estado">
+      <option>borrador</option><option>enviado</option><option>aceptado</option><option>rechazado</option>
+    </select>
+
+    <h3>Items</h3>
+    <div *ngFor="let it of items.controls; let i = index" [formGroupName]="i" class="item">
+      <input placeholder="Producto ID" formControlName="productoId" type="number">
+      <input placeholder="Nombre" formControlName="nombre">
+      <input placeholder="Cant." formControlName="cantidad" type="number">
+      <input placeholder="Precio" formControlName="precio" type="number" step="0.01">
+    </div>
+    <button type="button" (click)="addItem()">Agregar ítem</button>
+
+    <div class="total">Total: {{ total() | number:'1.2-2' }}</div>
+    <button [disabled]="saving || form.invalid">Guardar</button>
+  </form>
+</div>

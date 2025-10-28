@@ -1,1 +1,196 @@
-/* You can add global styles to this file, and also import other style files */
+/* === Layout base y fondo === */
+:root{
+  --brand: #0d47a1;        /* azul francia */
+  --brand-600:#0b3e8e;
+  --text:#0f172a;
+  --muted:#64748b;
+  --ring: rgba(13,71,161,.25);
+  --shadow: 0 10px 30px rgba(2, 6, 23, .10);
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
+  color: var(--text);
+  background:
+    radial-gradient(1200px 600px at 20% -10%, rgba(13,71,161,.06), transparent 60%),
+    radial-gradient(1000px 500px at 120% 120%, rgba(13,71,161,.05), transparent 65%),
+    #f6f7fb;
+}
+
+/* Centrado del área de auth (login/register) */
+.auth-layout{
+  min-height: 100dvh;            /* ocupa toda la altura de viewport */
+  display: grid;
+  place-items: center;           /* centra vertical y horizontal */
+  padding: 24px;
+}
+
+/* Tarjetas reutilizables (login / register / próximamente productos) */
+.auth-card{
+  width: min(560px, 92vw);
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  padding: 28px;
+  border: 1px solid rgba(2, 6, 23, .06);
+}
+
+/* Botón primario consistente */
+.btn-primary{
+  background: var(--brand);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-weight: 600;
+  width: 100%;
+  cursor: pointer;
+  transition: transform .06s ease, box-shadow .2s ease, background .2s ease;
+  box-shadow: 0 8px 16px rgba(13,71,161,.15);
+}
+.btn-primary:hover{ background: var(--brand-600); transform: translateY(-1px); }
+.btn-primary:active{ transform: translateY(0); }
+
+/* Inputs */
+.input{
+  width: 100%;
+  height: 44px;
+  border: 1px solid rgba(2, 6, 23, .12);
+  border-radius: 10px;
+  padding: 0 12px;
+  outline: none;
+  transition: border-color .15s ease, box-shadow .15s ease;
+  background: #fff;
+}
+.input:focus{
+  border-color: var(--brand);
+  box-shadow: 0 0 0 4px var(--ring);
+}
+
+/* Tipografías utilitarias */
+.h1{ font-size: clamp(22px, 3.2vw, 28px); margin: 0 0 6px; font-weight: 800; letter-spacing: .2px; }
+.subtitle{ color: var(--muted); font-size: 14px; margin-bottom: 16px; }
+
+/* Animación suave de entrada */
+@keyframes fade-slide-up{
+  from{ opacity: 0; transform: translateY(10px); }
+  to{ opacity: 1; transform: translateY(0); }
+}
+.card-appear{
+  animation: fade-slide-up .35s ease-out both;
+}
+/* ==== Productos layout estilizado ==== */
+
+.productos-layout {
+  max-width: 900px;
+  margin: 40px auto;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  padding: 30px;
+  border: 1px solid rgba(2, 6, 23, 0.06);
+}
+
+.productos-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 22px;
+}
+
+.productos-busqueda {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.productos-tabla table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+}
+
+.productos-tabla th {
+  text-align: left;
+  color: var(--muted);
+  border-bottom: 2px solid rgba(2, 6, 23, 0.08);
+  padding-bottom: 8px;
+}
+
+.productos-tabla td {
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(2, 6, 23, 0.05);
+}
+
+.productos-tabla td:last-child {
+  text-align: right;
+}
+
+.btn-accion {
+  border: none;
+  border-radius: 8px;
+  padding: 6px 12px;
+  margin-left: 4px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.1s ease;
+  color: #fff;
+}
+
+.btn-accion:hover {
+  transform: translateY(-1px);
+}
+
+.btn-accion.blue {
+  background: var(--brand);
+}
+.btn-accion.gray {
+  background: #64748b;
+}
+.btn-accion.red {
+  background: #d32f2f;
+}
+.btn-accion:active {
+  transform: translateY(0);
+} 
+/* ==== Botón de cierre de sesión ==== */
+.btn-logout {
+  background: transparent;
+  border: 1.5px solid var(--brand);
+  color: var(--brand);
+  border-radius: 10px;
+  padding: 10px 16px;
+  font-weight: 600;
+  margin-left: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-logout:hover {
+  background: var(--brand);
+  color: #fff;
+  box-shadow: 0 4px 10px rgba(13, 71, 161, 0.25);
+  transform: translateY(-1px);
+}
+
+/* Ajuste del header para botones */
+.productos-acciones {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Animación extra del título */
+@keyframes titulo-fade {
+  from { opacity: 0; transform: translateY(6px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.productos-titulo {
+  animation: titulo-fade 0.5s ease forwards;
+}

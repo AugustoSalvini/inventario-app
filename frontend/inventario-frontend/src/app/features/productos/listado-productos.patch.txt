@@ -1,0 +1,9 @@
+# Cambios sugeridos para tu componente de Productos (HTML)
+# Reemplazá el bloque de acciones por este, usando AuthService (inyectado público):
+<td class="acciones">
+  <button *ngIf="auth.canEdit" (click)="onEdit(p)">Editar</button>
+  <button *ngIf="auth.isAdmin" (click)="onDelete(p)">Borrar</button>
+</td>
+
+# En el TS del componente:
+constructor(public auth: AuthService) {}

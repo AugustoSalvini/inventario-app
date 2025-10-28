@@ -1,0 +1,14 @@
+<div class="box">
+  <h2>Clientes</h2>
+  <input placeholder="Buscar..." [(ngModel)]="q" (ngModelChange)="buscar()" />
+  <table class="table">
+    <thead><tr><th>Nombre</th><th>Email</th><th>Teléfono</th></tr></thead>
+    <tbody>
+      <tr *ngFor="let c of data?.data">
+        <td>{{c.nombre}}</td>
+        <td>{{c.email}}</td>
+        <td>{{c.telefono}}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>

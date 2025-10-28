@@ -1,0 +1,21 @@
+<div class="box">
+  <h2>Presupuestos</h2>
+  <div class="filters">
+    <input placeholder="Buscar por cliente..." [(ngModel)]="q" (ngModelChange)="buscar()" />
+    <select [(ngModel)]="estado" (change)="buscar()">
+      <option value="">Todos</option>
+      <option>borrador</option><option>enviado</option><option>aceptado</option><option>rechazado</option>
+    </select>
+  </div>
+  <table class="table">
+    <thead><tr><th>Fecha</th><th>Cliente</th><th>Estado</th><th>Total</th></tr></thead>
+    <tbody>
+      <tr *ngFor="let p of data?.data">
+        <td>{{p.fecha | date}}</td>
+        <td>{{p.cliente?.nombre}}</td>
+        <td>{{p.estado}}</td>
+        <td>{{p.total | number:'1.2-2'}}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>

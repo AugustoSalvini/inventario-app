@@ -1,53 +1,83 @@
 import { Component, OnInit } from '@angular/core';
-import { firstValueFrom } from 'rxjs';
-import { ProductosApi, Producto } from './productos.api';
+import { CommonModule, DecimalPipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 
-// Si ya tenés un AuthService con roleIn(), importalo en vez de este stub
-class AuthStub {
-  token: string | null = localStorage.getItem('token');
-  role: string | null = localStorage.getItem('role');
-  roleIn(arr: string[]) { return !!this.role && arr.includes(this.role!); }
-}
+import { AuthService } from './core/services/auth.service';
+import { ProductosApi, Producto } from './productos.api';
 
 @Component({
   selector: 'app-productos',
-  templateUrl: './productos.component.html'
+  standalone: true,
+  imports: [CommonModule, FormsModule, DecimalPipe],
+  templateUrl: './productos.component.html',
+  styleUrls: ['./productos.component.css'],
 })
 export class ProductosComponent implements OnInit {
+  data: Producto[] = [];
   q = '';
   loading = false;
-  data: Producto[] = [];
-  auth = new AuthStub();
+  error = '';
 
-  constructor(private api: ProductosApi, private router: Router) {}
+  constructor(
+    public auth: AuthService,
+    private api: ProductosApi,
+    private router: Router
+  ) {}
 
-  async ngOnInit() { await this.fetch(); }
+  ngOnInit(): void {
+    this.fetch();
+  }
 
-  async fetch() {
+  fetch(): void {
     this.loading = true;
-    try {
-      const res = await firstValueFrom(this.api.list(this.q || undefined));
-      this.data = res.data ?? [];
-    } finally {
-      this.loading = false;
-    }
+    this.error = '';
+    this.api.list(this.q).subscribe({
+      next: (items) => {
+        this.data = items;
+        this.loading = false;
+      },
+      error: () => {
+        this.error = 'No se pudieron cargar los productos';
+        this.loading = false;
+      },
+    });
   }
 
-  nuevo() { this.router.navigate(['/productos/nuevo']); }
-  editar(p: Producto) { this.router.navigate(['/productos', p.id, 'editar']); }
+  buscar(): void {
+    this.fetch();
+  }
 
-  async eliminar(p: Producto) {
+  nuevo(): void {
+    this.router.navigate(['/productos/nuevo']);
+  }
+
+  editar(p: Producto): void {
+    this.router.navigate(['/productos', p.id, 'editar']);
+  }
+
+  eliminar(p: Producto): void {
     if (!confirm(`¿Eliminar "${p.nombre}"?`)) return;
-    await firstValueFrom(this.api.remove(p.id!));
-    this.data = this.data.filter(x => x.id !== p.id);
+    this.api.delete(p.id).subscribe({
+      next: () => this.fetch(),
+      error: () => (this.error = 'No se pudo eliminar el producto'),
+    });
   }
 
-  async actualizarStock(p: Producto) {
-    const nuevo = Number(prompt(`Stock actual: ${p.stock}\nNuevo stock:`));
-    if (Number.isNaN(nuevo)) return;
-    const res = await firstValueFrom(this.api.updateStock(p.id!, nuevo));
-    p.stock = res.data.stock;
-    alert('Stock actualizado');
+  actualizarStock(p: Producto): void {
+    const val = prompt(`Nuevo stock para "${p.nombre}"`, String(p.stock ?? 0));
+    if (val == null) return;
+    const nuevo = Number(val);
+    if (Number.isNaN(nuevo) || nuevo < 0) return;
+
+    this.api.updateStock(p.id, nuevo).subscribe({
+      next: () => this.fetch(),
+      error: () => (this.error = 'No se pudo actualizar el stock'),
+    });
+  }
+
+  // ✅ Nuevo método para cerrar sesión
+  logout(): void {
+    this.auth.logout();
   }
 }

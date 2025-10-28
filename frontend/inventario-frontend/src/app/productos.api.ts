@@ -1,39 +1,58 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { environment } from '../environments/environment';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 export interface Producto {
-  id?: number;
-  codigo?: string;
+  id: number;
   nombre: string;
-  descripcion?: string;
   precio: number;
   stock: number;
-  activo?: boolean;
+  created_at?: string;
+  updated_at?: string;
 }
 
 @Injectable({ providedIn: 'root' })
 export class ProductosApi {
-  private api = environment.apiUrl + '/productos';
+  private base = `${environment.apiBaseUrl}/productos`;
+
   constructor(private http: HttpClient) {}
 
-  list(q?: string) {
-    const params = q ? new HttpParams().set('q', q) : undefined;
-    return this.http.get<{ ok: boolean; data: Producto[] }>(this.api, { params });
+  /** Siempre emite Producto[] aunque el backend devuelva [] o {data: []} */
+  list(q?: string): Observable<Producto[]> {
+    const options =
+      q
+        ? { params: { q }, observe: 'body' as const }
+        : { observe: 'body' as const };
+
+    return this.http
+      .get<Producto[] | { data: Producto[] }>(this.base, options)
+      .pipe(
+        map((res: any) => (Array.isArray(res) ? res : (res?.data ?? [])))
+      );
   }
-  get(id: number) {
-    return this.http.get<{ ok: boolean; data: Producto }>(`${this.api}/${id}`);
+
+  get(id: number): Observable<Producto> {
+    return this.http.get<Producto>(`${this.base}/${id}`, { observe: 'body' as const });
   }
-  create(body: Producto) {
-    return this.http.post<{ ok: boolean; data: Producto }>(this.api, body);
+
+  create(body: Partial<Producto>): Observable<Producto> {
+    return this.http.post<Producto>(this.base, body, { observe: 'body' as const });
   }
-  update(id: number, body: Partial<Producto>) {
-    return this.http.put<{ ok: boolean; data: Producto }>(`${this.api}/${id}`, body);
+
+  update(id: number, body: Partial<Producto>): Observable<Producto> {
+    return this.http.put<Producto>(`${this.base}/${id}`, body, { observe: 'body' as const });
   }
-  updateStock(id: number, stock: number) {
-    return this.http.patch<{ ok: boolean; data: Producto }>(`${this.api}/${id}/stock`, { stock });
+
+  delete(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.base}/${id}`, { observe: 'body' as const });
   }
-  remove(id: number) {
-    return this.http.delete<{ ok: boolean; message: string }>(`${this.api}/${id}`);
+  remove(id: number): Observable<void> {
+    return this.delete(id);
+  }
+
+  updateStock(id: number, stock: number): Observable<Producto> {
+    return this.http.patch<Producto>(`${this.base}/${id}/stock`, { stock }, { observe: 'body' as const });
   }
 }

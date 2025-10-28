@@ -1,25 +1,13 @@
 <?php
 
 return [
-
-    /*
-    |--------------------------------------------------------------------------
-    | Laravel CORS Configuration
-    |--------------------------------------------------------------------------
-    |
-    | Configuración para habilitar peticiones desde el frontend Angular.
-    | Paths incluye API y sanctum/csrf-cookie.
-    |
-    */
-
-    'paths' => ['api/*', 'sanctum/csrf-cookie'],
+    // Para no fallar con rutas, probemos con todo
+    'paths' => ['*'],
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => [
-        'http://localhost:4200',   // tu frontend Angular
-    ],
-
+    // Como NO usamos credenciales (cookies) podemos abrir a cualquier origen
+    'allowed_origins' => ['*'],
     'allowed_origins_patterns' => [],
 
     'allowed_headers' => ['*'],
@@ -28,6 +16,6 @@ return [
 
     'max_age' => 0,
 
-    'supports_credentials' => true,
-
+    // En dev con tokens Bearer, esto en false
+    'supports_credentials' => false,
 ];

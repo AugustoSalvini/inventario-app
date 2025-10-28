@@ -1,72 +1,81 @@
-import { Component, OnInit } from '@angular/core';
-import { FormBuilder, Validators, FormGroup } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
-import { firstValueFrom } from 'rxjs';
+// src/app/producto-form.component.ts
+import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormBuilder, Validators, ReactiveFormsModule, FormGroup } from '@angular/forms';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+
 import { ProductosApi, Producto } from './productos.api';
+import { AuthService } from './auth.service';
 
 @Component({
   selector: 'app-producto-form',
-  templateUrl: './producto-form.component.html'
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  templateUrl: './producto-form.component.html',
+  styleUrls: ['./producto-form.component.css'],
 })
-export class ProductoFormComponent implements OnInit {
+export class ProductoFormComponent {
   id?: number;
   loading = false;
+  error = '';
 
-  form: FormGroup;
+  // ✅ solo se declara acá…
+  form!: FormGroup;
 
   constructor(
     private fb: FormBuilder,
-    private api: ProductosApi,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private api: ProductosApi,
+    public auth: AuthService
   ) {
+    // …y se inicializa dentro del constructor (evita TS2729)
     this.form = this.fb.group({
-      codigo: [''],
-      nombre: ['', [Validators.required, Validators.maxLength(150)]],
-      descripcion: [''],
+      nombre: ['', [Validators.required]],
       precio: [0, [Validators.required, Validators.min(0)]],
       stock: [0, [Validators.required, Validators.min(0)]],
-      activo: [true],
     });
-  }
 
-  async ngOnInit() {
-    const param = this.route.snapshot.paramMap.get('id');
-    this.id = param ? Number(param) : undefined;
+    const rawId = this.route.snapshot.paramMap.get('id');
+    this.id = rawId ? Number(rawId) : undefined;
 
     if (this.id) {
       this.loading = true;
-      try {
-        const res = await firstValueFrom(this.api.get(this.id));
-        this.form.patchValue(res.data);
-      } finally {
-        this.loading = false;
-      }
+      this.api.get(this.id).subscribe({
+        next: (p: Producto) => {
+          this.form.patchValue({
+            nombre: p.nombre ?? '',
+            precio: p.precio ?? 0,
+            stock: p.stock ?? 0,
+          });
+          this.loading = false;
+        },
+        error: () => {
+          this.error = 'No se pudo cargar el producto';
+          this.loading = false;
+        },
+      });
     }
   }
 
-  async submit() {
+  submit() {
     if (this.form.invalid) return;
     this.loading = true;
-    try {
-      const body = this.form.value as Producto;
-      // Normalizo numéricos por las dudas
-      body.precio = Number(body.precio);
-      body.stock  = Number(body.stock);
+    const payload = this.form.value as Partial<Producto>;
 
-      if (this.id) {
-        await firstValueFrom(this.api.update(this.id, body));
-        alert('Producto actualizado');
-      } else {
-        await firstValueFrom(this.api.create(body));
-        alert('Producto creado');
-      }
-      this.router.navigate(['/productos']);
-    } catch (e) {
-      console.error(e);
-      alert('No se pudo guardar');
-    } finally {
-      this.loading = false;
-    }
+    const obs = this.id
+      ? this.api.update(this.id, payload)
+      : this.api.create(payload);
+
+    obs.subscribe({
+      next: () => {
+        this.loading = false;
+        this.router.navigate(['/productos']);
+      },
+      error: () => {
+        this.error = this.id ? 'No se pudo actualizar' : 'No se pudo crear';
+        this.loading = false;
+      },
+    });
   }
 }

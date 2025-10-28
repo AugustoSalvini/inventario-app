@@ -1,21 +1,12 @@
 import { Routes } from '@angular/router';
+import { LoginComponent } from './auth/login/login.component';
+import { RegisterComponent } from './auth/register/register.component';
 import { ProductosComponent } from './productos.component';
 
 export const routes: Routes = [
-  { path: '', redirectTo: 'login', pathMatch: 'full' },
-
-  {
-    path: 'login',
-    // como tus archivos son login.ts y register.ts:
-    loadComponent: () =>
-      import('./login').then(m => m.LoginComponent),
-  },
-
-  {
-    path: 'register',
-    loadComponent: () =>
-      import('./register').then(m => m.RegisterComponent),
-  },
-
+  { path: 'login', component: LoginComponent },
+  { path: 'register', component: RegisterComponent },
   { path: 'productos', component: ProductosComponent },
+  { path: '', pathMatch: 'full', redirectTo: 'login' },
+  { path: '**', redirectTo: 'login' }
 ];
