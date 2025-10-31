@@ -1,21 +1,32 @@
-<div class="box">
-  <h2>Presupuestos</h2>
-  <div class="filters">
-    <input placeholder="Buscar por cliente..." [(ngModel)]="q" (ngModelChange)="buscar()" />
-    <select [(ngModel)]="estado" (change)="buscar()">
-      <option value="">Todos</option>
-      <option>borrador</option><option>enviado</option><option>aceptado</option><option>rechazado</option>
-    </select>
+<div class="productos-layout card-appear">
+  <div class="productos-header">
+    <h1 class="h1">Presupuestos</h1>
+    <button *ngIf="auth.canEdit()" class="btn-primary" (click)="nuevo()">Nuevo presupuesto</button>
   </div>
-  <table class="table">
-    <thead><tr><th>Fecha</th><th>Cliente</th><th>Estado</th><th>Total</th></tr></thead>
-    <tbody>
-      <tr *ngFor="let p of data?.data">
-        <td>{{p.fecha | date}}</td>
-        <td>{{p.cliente?.nombre}}</td>
-        <td>{{p.estado}}</td>
-        <td>{{p.total | number:'1.2-2'}}</td>
-      </tr>
-    </tbody>
-  </table>
+
+  <div class="productos-busqueda">
+    <input class="input" placeholder="Buscar presupuesto..." [(ngModel)]="q" (keyup.enter)="buscar()"/>
+    <button class="btn-primary" style="width:auto" (click)="buscar()">Buscar</button>
+  </div>
+
+  <div *ngIf="loading" class="text-muted" style="text-align:center;">Cargando…</div>
+  <div *ngIf="!loading && data.length===0" class="text-muted" style="text-align:center;">Sin resultados.</div>
+
+  <div class="productos-tabla" *ngIf="!loading && data.length">
+    <table>
+      <thead><tr><th>ID</th><th>Cliente</th><th>Total</th><th>Estado</th><th>Acciones</th></tr></thead>
+      <tbody>
+        <tr *ngFor="let p of data">
+          <td>{{p.id}}</td>
+          <td>{{p.cliente_id}}</td>
+          <td>{{p.total | number:'1.2-2'}}</td>
+          <td>{{p.estado || 'borrador'}}</td>
+          <td class="acciones">
+            <button *ngIf="auth.canEdit()" class="btn-accion gray" (click)="editar(p)">Editar</button>
+            <button *ngIf="auth.canDelete()" class="btn-accion red" (click)="eliminar(p)">Eliminar</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 </div>

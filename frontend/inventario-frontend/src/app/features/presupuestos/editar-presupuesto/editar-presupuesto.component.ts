@@ -1,51 +1,78 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, Validators, FormArray, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { PresupuestosService } from '../../../core/api/presupuestos.service';
+import { FormBuilder, ReactiveFormsModule, Validators, FormGroup } from '@angular/forms';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+
+import { PresupuestosApi, Presupuesto } from '../presupuestos.api';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
-  selector: 'app-editar-presupuesto',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  selector: 'app-editar-presupuesto',
+  imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './editar-presupuesto.component.html',
-  styleUrls: ['./editar-presupuesto.component.css']
 })
 export class EditarPresupuestoComponent {
-  form: FormGroup;
-  saving = false;
+  id?: number;
+  loading = false;
+  error = '';
 
-  constructor(private fb: FormBuilder, private api: PresupuestosService) {
-    this.form = this.fb.group({
-      cliente_id: [null, Validators.required],
-      fecha: [''],
-      estado: ['borrador'],
-      items: this.fb.array([])
+  // Declaración (se inicializa en el constructor)
+  form!: FormGroup;
+
+  constructor(
+    private fb: FormBuilder,
+    private route: ActivatedRoute,
+    private router: Router,
+    private api: PresupuestosApi,
+    public auth: AuthService
+  ) {
+    // ✅ Inicialización AQUÍ (evita TS2729)
+    this.form = this.fb.nonNullable.group({
+      cliente_id: [0,  [Validators.required, Validators.min(1)]],
+      total:      [0,  [Validators.required, Validators.min(0)]],
+      estado:     ['borrador', [Validators.required]],
+      notas:      [''],
     });
-    this.addItem();
+
+    const rawId = this.route.snapshot.paramMap.get('id');
+    this.id = rawId ? Number(rawId) : undefined;
+
+    if (this.id) {
+      this.loading = true;
+      this.api.show(this.id).subscribe({
+        next: (p: Presupuesto) => {
+          this.form.patchValue({
+            cliente_id: p.cliente_id ?? 0,
+            total:      p.total ?? 0,
+            estado:     p.estado ?? 'borrador',
+            notas:      p.notas ?? '',
+          }, { emitEvent: false });
+          this.loading = false;
+        },
+        error: () => { this.error = 'No se pudo cargar el presupuesto'; this.loading = false; },
+      });
+    }
   }
 
-  get items(): FormArray { return this.form.get('items') as FormArray; }
-
-  addItem(): void {
-    this.items.push(this.fb.group({
-      productoId: [null, Validators.required],
-      nombre: ['', Validators.required],
-      cantidad: [1, [Validators.required]],
-      precio: [0, [Validators.required]]
-    }));
-  }
-
-  total(): number {
-    return this.items.value.reduce((acc: number, it: any) => acc + (+it.cantidad * +it.precio), 0);
-  }
-
-  submit(): void {
+  save(): void {
     if (this.form.invalid) return;
-    this.saving = true;
-    const dto = {...this.form.value, total: this.total() };
-    this.api.create(dto).subscribe({
-      next: () => { this.saving = false; alert('Presupuesto guardado'); },
-      error: () => { this.saving = false; }
+    this.loading = true;
+    this.error = '';
+
+    const v = this.form.getRawValue();
+    const payload: Partial<Presupuesto> = {
+      cliente_id: Number(v.cliente_id ?? 0),
+      total:      Number(v.total ?? 0),
+      estado:     v.estado ?? 'borrador',
+      notas:      v.notas ?? '',
+    };
+
+    const obs = this.id ? this.api.update(this.id, payload) : this.api.create(payload);
+
+    obs.subscribe({
+      next: () => { this.loading = false; this.router.navigate(['/presupuestos']); },
+      error: () => { this.error = 'No se pudo guardar'; this.loading = false; },
     });
   }
 }

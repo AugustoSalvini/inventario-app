@@ -1,61 +1,123 @@
 <div class="productos-layout card-appear">
+  <!-- HEADER -->
   <div class="productos-header">
     <h1 class="h1 productos-titulo">Productos</h1>
 
     <div class="productos-acciones">
-      <button *ngIf="auth.canEdit()" class="btn-primary" (click)="nuevo()">
-        Nuevo producto
-      </button>
-
-      <button class="btn-logout" (click)="logout()">
-        Cerrar sesión
-      </button>
+      <button *ngIf="auth.canEdit()" class="btn-primary" (click)="nuevo()">Nuevo producto</button>
+      <button class="btn-logout" (click)="logout()">Cerrar sesión</button>
     </div>
   </div>
 
+  <!-- BUSCADOR -->
   <div class="productos-busqueda">
     <input
       type="text"
       class="input"
-      placeholder="Buscar producto..."
+      placeholder="Buscar producto o código..."
       [(ngModel)]="q"
       (keyup.enter)="fetch()"
     />
     <button class="btn-primary" style="width:auto;" (click)="fetch()">Buscar</button>
   </div>
 
+  <!-- FORMULARIO CENTRADO -->
+  <div class="auth-card centered" *ngIf="showForm">
+    <h3 class="h1">{{ editingId ? 'Editar producto' : 'Nuevo producto' }}</h3>
+    <p class="subtitle">
+      Completá los datos y guardá para {{ editingId ? 'actualizar' : 'crear' }} el producto.
+    </p>
+
+    <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      <div class="form-grid">
+        <div class="auth-field">
+          <label class="auth-label">Código</label>
+          <input type="text" class="auth-input" formControlName="codigo" placeholder="Ej: P-001" />
+        </div>
+
+        <div class="auth-field">
+          <label class="auth-label">Nombre</label>
+          <input type="text" class="auth-input" formControlName="nombre" placeholder="Ej: Taza cerámica" />
+        </div>
+
+        <div class="auth-field full">
+          <label class="auth-label">Descripción</label>
+          <textarea
+            class="auth-input"
+            formControlName="descripcion"
+            rows="3"
+            placeholder="Detalles del producto…"
+          ></textarea>
+        </div>
+
+        <div class="auth-field">
+          <label class="auth-label">Precio</label>
+          <input type="number" class="auth-input" formControlName="precio" min="0" step="0.01" />
+        </div>
+
+        <div class="auth-field">
+          <label class="auth-label">Stock</label>
+          <input type="number" class="auth-input" formControlName="stock" min="0" step="1" />
+        </div>
+
+        <div class="auth-field switch">
+          <input id="activo" type="checkbox" formControlName="activo" />
+          <label class="auth-label" for="activo">Activo</label>
+        </div>
+      </div>
+
+      <div class="auth-actions">
+        <button class="auth-btn" type="submit" [disabled]="loading">
+          {{ loading ? 'Guardando…' : 'Guardar' }}
+        </button>
+        <button class="btn-logout" type="button" (click)="cancelarForm()">Cancelar</button>
+      </div>
+
+      <div *ngIf="error" class="pf-alert error">
+        {{ error }}
+      </div>
+    </form>
+  </div>
+
+  <!-- MENSAJES DE ESTADO -->
   <div *ngIf="loading" class="text-muted" style="text-align:center;">Cargando...</div>
   <div *ngIf="!loading && data.length === 0" class="text-muted" style="text-align:center;">
     Sin resultados.
   </div>
 
+  <!-- TABLA -->
   <div class="productos-tabla" *ngIf="!loading && data.length">
     <table>
       <thead>
         <tr>
           <th>ID</th>
+          <th>Código</th>
           <th>Nombre</th>
-          <th>Precio</th>
-          <th>Stock</th>
-          <th>Acciones</th>
+          <th>Descripción</th>
+          <th class="text-end">Precio</th>
+          <th class="text-end">Stock</th>
+          <th>Estado</th>
+          <th class="text-end">Acciones</th>
         </tr>
       </thead>
+
       <tbody>
         <tr *ngFor="let p of data">
           <td>{{ p.id }}</td>
+          <td>{{ p.codigo || '-' }}</td>
           <td>{{ p.nombre }}</td>
-          <td>{{ p.precio | number: '1.2-2' }}</td>
-          <td>{{ p.stock }}</td>
-          <td class="acciones">
-            <button *ngIf="auth.canEdit()" (click)="actualizarStock(p)" class="btn-accion blue">
-              Stock
-            </button>
-            <button *ngIf="auth.canEdit()" (click)="editar(p)" class="btn-accion gray">
-              Editar
-            </button>
-            <button *ngIf="auth.canDelete()" (click)="eliminar(p)" class="btn-accion red">
-              Eliminar
-            </button>
+          <td>{{ p.descripcion || '-' }}</td>
+          <td class="text-end">{{ p.precio | number:'1.2-2' }}</td>
+          <td class="text-end">{{ p.stock }}</td>
+          <td>
+            <span class="badge" [ngClass]="p.activo ? 'badge-success' : 'badge-secondary'">
+              {{ p.activo ? 'Activo' : 'Inactivo' }}
+            </span>
+          </td>
+          <td class="text-end acciones">
+            <button class="btn-accion blue" *ngIf="auth.canEdit()" (click)="actualizarStock(p)">Stock</button>
+            <button class="btn-accion gray" *ngIf="auth.canEdit()" (click)="editar(p)">Editar</button>
+            <button class="btn-accion red" *ngIf="auth.canDelete()" (click)="eliminar(p)">Eliminar</button>
           </td>
         </tr>
       </tbody>

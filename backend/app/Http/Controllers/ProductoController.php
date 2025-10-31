@@ -1,68 +1,48 @@
-<?php
-
-namespace App\Http\Controllers;
-
-use App\Models\Producto;
-use Illuminate\Http\Request;
-use App\Http\Requests\StoreProductoRequest;
-use App\Http\Requests\UpdateProductoRequest;
-
-class ProductoController extends Controller
+public function index(Request $request)
 {
-    // GET /api/productos
-    public function index(Request $request)
-    {
-        $q = Producto::query();
+    $q = $request->query('q');
+    $query = Producto::query();
 
-        if ($search = $request->query('q')) {
-            $q->where(function ($qq) use ($search) {
-                $qq->where('nombre', 'ilike', "%{$search}%")
-                   ->orWhere('codigo', 'ilike', "%{$search}%");
-            });
-        }
-
-        // simple paginación
-        $productos = $q->orderBy('nombre')->paginate(10);
-
-        return response()->json($productos);
+    if ($q) {
+        $query->where(function ($sub) use ($q) {
+            $sub->where('nombre', 'ilike', "%{$q}%")
+                ->orWhere('codigo', 'ilike', "%{$q}%")
+                ->orWhere('id', $q);
+        });
     }
 
-    // POST /api/productos
-    public function store(StoreProductoRequest $request)
-    {
-        $producto = Producto::create($request->validated());
-        return response()->json($producto, 201);
-    }
+    return response()->json($query->orderBy('id', 'desc')->get());
+}
 
-    // GET /api/productos/{producto}
-    public function show(Producto $producto)
-    {
-        return response()->json($producto);
-    }
+public function store(Request $request)
+{
+    $data = $request->validate([
+        'codigo'      => ['required','string','max:50','unique:productos,codigo'],
+        'nombre'      => ['required','string','max:255'],
+        'descripcion' => ['nullable','string'],
+        'precio'      => ['required','numeric','min:0'],
+        'stock'       => ['required','integer','min:0'],
+        'activo'      => ['sometimes','boolean'],
+    ]);
 
-    // PUT/PATCH /api/productos/{producto}
-    public function update(UpdateProductoRequest $request, Producto $producto)
-    {
-        $producto->update($request->validated());
-        return response()->json($producto);
-    }
+    // por si no viene "activo"
+    $data['activo'] = array_key_exists('activo', $data) ? (bool)$data['activo'] : true;
 
-    // DELETE /api/productos/{producto}
-    public function destroy(Producto $producto)
-    {
-        $producto->delete();
-        return response()->json(['deleted' => true]);
-    }
+    $p = Producto::create($data);
+    return response()->json($p, 201);
+}
 
-    // PATCH /api/productos/{producto}/stock
-    public function updateStock(Request $request, Producto $producto)
-    {
-        $data = $request->validate([
-            'stock' => ['required','integer','min:0'],
-        ]);
+public function update(Request $request, Producto $producto)
+{
+    $data = $request->validate([
+        'codigo'      => ['sometimes','string','max:50',"unique:productos,codigo,{$producto->id}"],
+        'nombre'      => ['sometimes','string','max:255'],
+        'descripcion' => ['sometimes','nullable','string'],
+        'precio'      => ['sometimes','numeric','min:0'],
+        'stock'       => ['sometimes','integer','min:0'],
+        'activo'      => ['sometimes','boolean'],
+    ]);
 
-        $producto->update(['stock' => $data['stock']]);
-
-        return response()->json($producto);
-    }
+    $producto->update($data);
+    return response()->json($producto);
 }

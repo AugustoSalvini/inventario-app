@@ -1,25 +1,17 @@
-<div class="box">
-  <h2>Nuevo / Editar Presupuesto</h2>
-  <form [formGroup]="form" (ngSubmit)="submit()">
-    <label>Cliente ID*</label>
-    <input formControlName="cliente_id" type="number">
-    <label>Fecha</label>
-    <input formControlName="fecha" type="date">
-    <label>Estado</label>
-    <select formControlName="estado">
-      <option>borrador</option><option>enviado</option><option>aceptado</option><option>rechazado</option>
-    </select>
+<div class="productos-layout card-appear" style="max-width:720px">
+  <h2 class="h1">{{ id ? 'Editar presupuesto' : 'Nuevo presupuesto' }}</h2>
 
-    <h3>Items</h3>
-    <div *ngFor="let it of items.controls; let i = index" [formGroupName]="i" class="item">
-      <input placeholder="Producto ID" formControlName="productoId" type="number">
-      <input placeholder="Nombre" formControlName="nombre">
-      <input placeholder="Cant." formControlName="cantidad" type="number">
-      <input placeholder="Precio" formControlName="precio" type="number" step="0.01">
+  <form [formGroup]="form" (ngSubmit)="save()">
+    <div class="auth-field"><label class="auth-label">Cliente ID</label><input class="input" formControlName="cliente_id"/></div>
+    <div class="auth-field"><label class="auth-label">Total</label><input type="number" class="input" formControlName="total"/></div>
+    <div class="auth-field"><label class="auth-label">Estado</label><input class="input" formControlName="estado"/></div>
+    <div class="auth-field"><label class="auth-label">Notas</label><input class="input" formControlName="notas"/></div>
+
+    <div style="display:flex;gap:10px;">
+      <button class="btn-primary" type="submit" [disabled]="loading || form.invalid">{{ loading ? 'Guardando…' : 'Guardar' }}</button>
+      <a routerLink="/presupuestos" class="btn-logout" style="text-decoration:none;display:inline-flex;align-items:center;">Cancelar</a>
     </div>
-    <button type="button" (click)="addItem()">Agregar ítem</button>
 
-    <div class="total">Total: {{ total() | number:'1.2-2' }}</div>
-    <button [disabled]="saving || form.invalid">Guardar</button>
+    <div *ngIf="error" style="color:#b42318;margin-top:10px;font-weight:600;">{{error}}</div>
   </form>
 </div>

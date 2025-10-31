@@ -1,14 +1,32 @@
-<div class="box">
-  <h2>Clientes</h2>
-  <input placeholder="Buscar..." [(ngModel)]="q" (ngModelChange)="buscar()" />
-  <table class="table">
-    <thead><tr><th>Nombre</th><th>Email</th><th>Teléfono</th></tr></thead>
-    <tbody>
-      <tr *ngFor="let c of data?.data">
-        <td>{{c.nombre}}</td>
-        <td>{{c.email}}</td>
-        <td>{{c.telefono}}</td>
-      </tr>
-    </tbody>
-  </table>
+<div class="productos-layout card-appear">
+  <div class="productos-header">
+    <h1 class="h1">Clientes</h1>
+    <button *ngIf="auth.canEdit()" class="btn-primary" (click)="nuevo()">Nuevo cliente</button>
+  </div>
+
+  <div class="productos-busqueda">
+    <input class="input" placeholder="Buscar cliente..." [(ngModel)]="q" (keyup.enter)="buscar()"/>
+    <button class="btn-primary" style="width:auto" (click)="buscar()">Buscar</button>
+  </div>
+
+  <div *ngIf="loading" class="text-muted" style="text-align:center;">Cargando…</div>
+  <div *ngIf="!loading && data.length===0" class="text-muted" style="text-align:center;">Sin resultados.</div>
+
+  <div class="productos-tabla" *ngIf="!loading && data.length">
+    <table>
+      <thead><tr><th>ID</th><th>Nombre</th><th>Email</th><th>Teléfono</th><th>Acciones</th></tr></thead>
+      <tbody>
+        <tr *ngFor="let c of data">
+          <td>{{c.id}}</td>
+          <td>{{c.nombre}}</td>
+          <td>{{c.email || '-'}}</td>
+          <td>{{c.telefono || '-'}}</td>
+          <td class="acciones">
+            <button *ngIf="auth.canEdit()" class="btn-accion gray" (click)="editar(c)">Editar</button>
+            <button *ngIf="auth.canDelete()" class="btn-accion red" (click)="eliminar(c)">Eliminar</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 </div>

@@ -1,28 +1,35 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule, DatePipe, DecimalPipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { PresupuestosService } from '../../../core/api/presupuestos.service';
+import { Router, RouterLink } from '@angular/router';
+import { PresupuestosApi, Presupuesto } from '../presupuestos.api';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
-  selector: 'app-listado-presupuestos',
   standalone: true,
-  imports: [CommonModule, FormsModule, DatePipe, DecimalPipe],
+  selector: 'app-listado-presupuestos',
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './listado-presupuestos.component.html',
-  styleUrls: ['./listado-presupuestos.component.css']
 })
 export class ListadoPresupuestosComponent implements OnInit {
-  q = ''; estado = '';
-  data: any;
-  page = 1; perPage = 10; loading = false;
+  q=''; data: Presupuesto[]=[]; loading=false; error='';
 
-  constructor(private api: PresupuestosService) {}
-  ngOnInit(): void { this.buscar(); }
+  constructor(private api: PresupuestosApi, public auth: AuthService, private router: Router){}
+  ngOnInit(){ this.fetch(); }
 
-  buscar(): void {
+  fetch(){
     this.loading = true;
-    this.api.list(this.q, this.estado, this.page, this.perPage).subscribe({
-      next: (res) => { this.data = res; this.loading = false; },
-      error: () => { this.loading = false; }
+    this.api.list(this.q).subscribe({
+      next: d => { this.data = d; this.loading = false; },
+      error: _ => { this.error = 'No se pudieron cargar'; this.loading = false; }
     });
+  }
+  buscar(){ this.fetch(); }
+  nuevo(){ if(!this.auth.canEdit()) return; this.router.navigate(['/presupuestos/nuevo']); }
+  editar(p: Presupuesto){ if(!this.auth.canEdit()) return; this.router.navigate(['/presupuestos', p.id, 'editar']); }
+  eliminar(p: Presupuesto){
+    if(!this.auth.canDelete()) return;
+    if(!confirm('¿Eliminar presupuesto?')) return;
+    this.api.delete(p.id).subscribe({ next:_=>this.fetch() });
   }
 }

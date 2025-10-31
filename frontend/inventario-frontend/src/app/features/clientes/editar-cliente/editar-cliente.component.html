@@ -1,16 +1,25 @@
+<!-- src/app/features/clientes/editar-cliente/editar-cliente.component.html -->
 <div class="box">
   <h2>Nuevo / Editar Cliente</h2>
-  <form [formGroup]="form" (ngSubmit)="submit()">
-    <label>Nombre*</label>
-    <input formControlName="nombre">
+
+  <form [formGroup]="form" (ngSubmit)="save()">
+    <label>Nombre</label>
+    <input formControlName="nombre" />
+
     <label>Email</label>
-    <input formControlName="email" type="email">
+    <input formControlName="email" type="email" />
+
     <label>Teléfono</label>
-    <input formControlName="telefono">
+    <input formControlName="telefono" />
+
     <label>Dirección</label>
-    <input formControlName="direccion">
+    <input formControlName="direccion" />
+
     <label>CUIT</label>
-    <input formControlName="cuit">
+    <input formControlName="cuit" />
+
     <button [disabled]="saving || form.invalid">Guardar</button>
   </form>
+
+  <div *ngIf="error" class="error">{{ error }}</div>
 </div>
