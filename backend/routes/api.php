@@ -3,36 +3,29 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProductoController;
+use App\Http\Controllers\PresupuestoController;
 
-// AUTH
+// Auth
 Route::prefix('auth')->group(function () {
     Route::post('register', [AuthController::class, 'register']);
-    Route::post('login',    [AuthController::class, 'login'])->middleware('throttle:5,1');
-
-    Route::middleware('auth:sanctum')->group(function () {
-        Route::get('me',      [AuthController::class, 'me']);
-        Route::post('logout', [AuthController::class, 'logout']);
-    });
+    Route::post('login',    [AuthController::class, 'login']);
+    Route::post('logout',   [AuthController::class, 'logout'])->middleware('auth:sanctum');
+    Route::get('me',        [AuthController::class, 'me'])->middleware('auth:sanctum');
 });
 
-// Pings por rol
-Route::middleware(['auth:sanctum','role:admin'])
-    ->get('/admin/ping', fn () => response()->json(['ok' => true, 'scope' => 'admin']));
-Route::middleware(['auth:sanctum','role:admin,empleado'])
-    ->get('/staff/ping', fn () => response()->json(['ok' => true, 'scope' => 'staff']));
-
-// PRODUCTOS
-Route::middleware(['auth:sanctum','role:admin,empleado,usuario'])->group(function () {
-    Route::get('/productos',            [ProductoController::class, 'index']);
-    Route::get('/productos/{producto}', [ProductoController::class, 'show']);
+// Productos (solo auth por ahora)
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get   ('/productos',                     [ProductoController::class, 'index']);
+    Route::post  ('/productos',                     [ProductoController::class, 'store']);
+    Route::get   ('/productos/{producto}',          [ProductoController::class, 'show']);
+    Route::put   ('/productos/{producto}',          [ProductoController::class, 'update']);
+    Route::delete('/productos/{producto}',          [ProductoController::class, 'destroy']);
+    Route::patch ('/productos/{producto}/stock',    [ProductoController::class, 'updateStock']);
+    Route::apiResource('presupuestos', PresupuestoController::class);
+    Route::get   ('/presupuestos',               [PresupuestoController::class, 'index']);
+    Route::post  ('/presupuestos',               [PresupuestoController::class, 'store']);
+    Route::get   ('/presupuestos/{presupuesto}', [PresupuestoController::class, 'show']);
+    Route::put   ('/presupuestos/{presupuesto}', [PresupuestoController::class, 'update']);
+    Route::delete('/presupuestos/{presupuesto}', [PresupuestoController::class, 'destroy']);
 });
 
-Route::middleware(['auth:sanctum','role:admin,empleado'])->group(function () {
-    Route::post('/productos',           [ProductoController::class, 'store']);
-    Route::put('/productos/{producto}', [ProductoController::class, 'update']);
-    Route::patch('/productos/{producto}/stock', [ProductoController::class, 'updateStock']);
-});
-
-Route::middleware(['auth:sanctum','role:admin'])->group(function () {
-    Route::delete('/productos/{producto}', [ProductoController::class, 'destroy']);
-});

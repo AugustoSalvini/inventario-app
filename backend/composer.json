@@ -18,17 +18,22 @@
   },
   "autoload-dev": {
     "psr-4": {
-      "Tests\\": "tests/"
+      "Tests\\": "tests/",
+      "Database\\Factories\\": "database/factories/",
+      "Database\\Seeders\\": "database/seeders/"
     }
   },
   "config": {
     "optimize-autoloader": true,
     "sort-packages": true
   },
-  "extra": { "laravel": { "dont-discover": [] } },
+  "extra": {
+    "laravel": {
+      "dont-discover": []
+    }
+  },
   "scripts": {
     "post-autoload-dump": [
-      "Illuminate\\\\Foundation\\\\ComposerScripts::postAutoloadDump",
       "@php artisan package:discover --ansi"
     ],
     "post-root-package-install": [

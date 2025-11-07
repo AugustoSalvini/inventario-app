@@ -2,25 +2,23 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Presupuesto extends Model
 {
-    use HasFactory;
+    protected $table = 'presupuestos';
 
     protected $fillable = [
-        'cliente_id','fecha','estado','total','items'
+        'user_id',
+        'cliente_id',
+        'estado',
+        'total',
+        'notas',
     ];
 
     protected $casts = [
-        'fecha' => 'date',
-        'items' => 'array',
-        'total' => 'decimal:2',
+        'user_id'   => 'integer',
+        'cliente_id'=> 'integer',
+        'total'     => 'decimal:2',
     ];
-
-    public function cliente()
-    {
-        return $this->belongsTo(Cliente::class);
-    }
 }

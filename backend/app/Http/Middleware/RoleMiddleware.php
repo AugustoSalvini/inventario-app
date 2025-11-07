@@ -4,30 +4,31 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class RoleMiddleware
 {
     /**
-     * Uso en rutas:
-     *   ->middleware('role:admin,empleado')
+     * Uso en ruta: ->middleware('role:admin') o 'role:admin,empleado'
      */
-    public function handle(Request $request, Closure $next, ...$roles)
+    public function handle(Request $request, Closure $next, ...$roles): Response
     {
-        // Con Sanctum, esto trae al usuario por el token Bearer
         $user = $request->user();
 
         if (!$user) {
-            return response()->json(['message' => 'No autenticado'], 401);
+            return response()->json(['message' => 'Unauthenticated'], 401);
         }
 
-        // Cambiá a $user->rol si tu columna se llama "rol"
-        $current = strtolower((string) $user->role);
+        // Asumo que el campo se llama 'role' o 'rol' en tu tabla users
+        $userRole = $user->role ?? $user->rol ?? null;
 
-        // Normalizamos los roles permitidos
-        $roles = array_map('strtolower', $roles);
+        if (!$userRole) {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
 
-        if (!in_array($current, $roles, true)) {
-            return response()->json(['message' => 'No autorizado'], 403);
+        // si no se pasaron roles, dejo pasar; si se pasaron, verifico
+        if (!empty($roles) && !in_array($userRole, $roles, true)) {
+            return response()->json(['message' => 'Forbidden'], 403);
         }
 
         return $next($request);

@@ -1,32 +1,37 @@
-<div class="productos-layout card-appear">
-  <div class="productos-header">
-    <h1 class="h1">Presupuestos</h1>
-    <button *ngIf="auth.canEdit()" class="btn-primary" (click)="nuevo()">Nuevo presupuesto</button>
-  </div>
+<h2>Presupuestos</h2>
 
-  <div class="productos-busqueda">
-    <input class="input" placeholder="Buscar presupuesto..." [(ngModel)]="q" (keyup.enter)="buscar()"/>
-    <button class="btn-primary" style="width:auto" (click)="buscar()">Buscar</button>
-  </div>
-
-  <div *ngIf="loading" class="text-muted" style="text-align:center;">Cargando…</div>
-  <div *ngIf="!loading && data.length===0" class="text-muted" style="text-align:center;">Sin resultados.</div>
-
-  <div class="productos-tabla" *ngIf="!loading && data.length">
-    <table>
-      <thead><tr><th>ID</th><th>Cliente</th><th>Total</th><th>Estado</th><th>Acciones</th></tr></thead>
-      <tbody>
-        <tr *ngFor="let p of data">
-          <td>{{p.id}}</td>
-          <td>{{p.cliente_id}}</td>
-          <td>{{p.total | number:'1.2-2'}}</td>
-          <td>{{p.estado || 'borrador'}}</td>
-          <td class="acciones">
-            <button *ngIf="auth.canEdit()" class="btn-accion gray" (click)="editar(p)">Editar</button>
-            <button *ngIf="auth.canDelete()" class="btn-accion red" (click)="eliminar(p)">Eliminar</button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+<div style="display:flex; gap:1rem; align-items:center">
+  <a routerLink="/productos">Volver a productos</a>
+  <input placeholder="Buscar por id o estado..." [(ngModel)]="q" />
+  <button (click)="buscar()">Buscar</button>
+  <a routerLink="/presupuestos/nuevo">Nuevo presupuesto</a>
 </div>
+
+<p *ngIf="loading">Cargando...</p>
+<p *ngIf="error" style="color:red">{{ error }}</p>
+<p *ngIf="!loading && !error && data.length === 0">Sin resultados.</p>
+
+<table *ngIf="!loading && !error && data.length > 0" border="1" cellpadding="6">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Cliente ID</th>
+      <th>Total</th>
+      <th>Estado</th>
+      <th>Notas</th>
+      <th>Acciones</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let p of data">
+      <td>{{ p.id }}</td>
+      <td>{{ p.cliente_id }}</td>
+      <td>{{ p.total | number:'1.2-2' }}</td>
+      <td>{{ p.estado }}</td>
+      <td>{{ p.notas || '-' }}</td>
+      <td>
+        <a [routerLink]="['/presupuestos', p.id, 'editar']">Editar</a>
+      </td>
+    </tr>
+  </tbody>
+</table>

@@ -3,87 +3,99 @@
 namespace App\Http\Controllers;
 
 use App\Models\Presupuesto;
-use App\Models\Cliente;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class PresupuestoController extends Controller
 {
     public function index(Request $request)
     {
-        $q = $request->query('q');
-        $estado = $request->query('estado');
-        $per = (int) ($request->query('per_page', 10));
+        try {
+            $q = trim((string) $request->query('q', ''));
+            $query = Presupuesto::query();
 
-        $query = Presupuesto::with('cliente');
-        if ($q) {
-            $query->whereHas('cliente', function($w) use ($q){
-                $w->where('nombre','ilike',"%{$q}%");
-            });
-        }
-        if ($estado) {
-            $query->where('estado', $estado);
-        }
+            if ($q !== '') {
+                if (is_numeric($q)) {
+                    $query->where('id', (int)$q);
+                } else {
+                    $query->where('estado', 'ilike', "%{$q}%");
+                }
+            }
 
-        return $query->orderBy('created_at','desc')->paginate($per);
+            return response()->json($query->orderBy('id', 'desc')->get());
+        } catch (\Throwable $e) {
+            Log::error('Presupuestos@index error', ['e' => $e]);
+            return response()->json(['message' => 'Error al listar presupuestos'], 500);
+        }
     }
 
-    public function show($id)
+    public function show(Presupuesto $presupuesto)
     {
-        $p = Presupuesto::with('cliente')->find($id);
-        if (!$p) return response()->json(['message' => 'Presupuesto no encontrado'], 404);
-        return $p;
+        return response()->json($presupuesto);
     }
 
     public function store(Request $request)
     {
-        $data = $request->validate([
-            'cliente_id' => ['required','exists:clientes,id'],
-            'fecha' => ['nullable','date'],
-            'estado' => ['nullable','in:borrador,enviado,aceptado,rechazado'],
-            'items' => ['required','array','min:1'],
-            'items.*.productoId' => ['required','integer'],
-            'items.*.nombre' => ['required','string','max:255'],
-            'items.*.cantidad' => ['required','numeric','gt:0'],
-            'items.*.precio' => ['required','numeric','gte:0'],
-        ]);
+        try {
+            $data = $request->validate([
+                'cliente_id' => 'required|integer|min:1',
+                'estado'     => 'required|in:borrador,confirmado,cancelado',
+                'total'      => 'required|numeric|min:0',
+                'notas'      => 'nullable|string',
+            ]);
 
-        $total = collect($data['items'])->reduce(fn($c, $i) => $c + ($i['cantidad'] * $i['precio']), 0);
-        $data['total'] = $total;
+            // tomar el user autenticado (Sanctum/JWT)
+            $data['user_id'] = $request->user()->id ?? null;
 
-        $p = Presupuesto::create($data);
-        return response()->json($p->load('cliente'), 201);
-    }
+            if (!$data['user_id']) {
+                return response()->json(['message' => 'No autenticado'], 401);
+            }
 
-    public function update(Request $request, $id)
-    {
-        $p = Presupuesto::find($id);
-        if (!$p) return response()->json(['message' => 'Presupuesto no encontrado'], 404);
+            // normalizar tipos
+            $data['total'] = (float) $data['total'];
 
-        $data = $request->validate([
-            'cliente_id' => ['sometimes','required','exists:clientes,id'],
-            'fecha' => ['nullable','date'],
-            'estado' => ['nullable','in:borrador,enviado,aceptado,rechazado'],
-            'items' => ['nullable','array','min:1'],
-            'items.*.productoId' => ['required_with:items','integer'],
-            'items.*.nombre' => ['required_with:items','string','max:255'],
-            'items.*.cantidad' => ['required_with:items','numeric','gt:0'],
-            'items.*.precio' => ['required_with:items','numeric','gte:0'],
-        ]);
-
-        if (isset($data['items'])) {
-            $data['total'] = collect($data['items'])->reduce(fn($c, $i) => $c + ($i['cantidad'] * $i['precio']), 0);
+            $p = Presupuesto::create($data);
+            return response()->json($p, 201);
+        } catch (\Illuminate\Validation\ValidationException $ve) {
+            return response()->json(['errors' => $ve->errors()], 422);
+        } catch (\Throwable $e) {
+            Log::error('Presupuestos@store error', ['e' => $e, 'payload' => $request->all()]);
+            return response()->json(['message' => 'Error al crear el presupuesto'], 500);
         }
-
-        $p->update($data);
-        return $p->load('cliente');
     }
 
-    public function destroy($id)
+    public function update(Request $request, Presupuesto $presupuesto)
     {
-        $p = Presupuesto::find($id);
-        if (!$p) return response()->json(['message' => 'Presupuesto no encontrado'], 404);
-        $p->delete();
-        return response()->json(['message' => 'Presupuesto eliminado']);
+        try {
+            $data = $request->validate([
+                'cliente_id' => 'sometimes|integer|min:1',
+                'estado'     => 'sometimes|in:borrador,confirmado,cancelado',
+                'total'      => 'sometimes|numeric|min:0',
+                'notas'      => 'sometimes|nullable|string',
+            ]);
+
+            if (array_key_exists('total', $data)) {
+                $data['total'] = (float) $data['total'];
+            }
+
+            $presupuesto->update($data);
+            return response()->json($presupuesto);
+        } catch (\Illuminate\Validation\ValidationException $ve) {
+            return response()->json(['errors' => $ve->errors()], 422);
+        } catch (\Throwable $e) {
+            Log::error('Presupuestos@update error', ['e' => $e, 'id' => $presupuesto->id, 'payload' => $request->all()]);
+            return response()->json(['message' => 'Error al actualizar el presupuesto'], 500);
+        }
+    }
+
+    public function destroy(Presupuesto $presupuesto)
+    {
+        try {
+            $presupuesto->delete();
+            return response()->json(['ok' => true]);
+        } catch (\Throwable $e) {
+            Log::error('Presupuestos@destroy error', ['e' => $e, 'id' => $presupuesto->id]);
+            return response()->json(['message' => 'Error al eliminar'], 500);
+        }
     }
 }

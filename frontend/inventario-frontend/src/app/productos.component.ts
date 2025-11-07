@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule, DecimalPipe } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 
 import { AuthService } from './core/services/auth.service';
 import { ProductosApi, Producto } from './productos.api';
@@ -9,7 +9,7 @@ import { ProductosApi, Producto } from './productos.api';
 @Component({
   selector: 'app-productos',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, DecimalPipe],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, DecimalPipe, RouterModule],
   templateUrl: './productos.component.html',
   styleUrls: ['./productos.component.css'],
 })

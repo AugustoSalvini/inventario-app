@@ -1,8 +1,13 @@
-<nav class="nav">
-  <a class="nav-brand" routerLink="/productos">Inventario</a>
+<nav class="navbar">
+  <div class="navbar-left">
+    <a routerLink="/productos" class="nav-link">Productos</a>
+    <a routerLink="/presupuestos" class="nav-link">Presupuestos</a>
+  </div>
 
-  <div class="nav-right">
-    <span class="nav-user" *ngIf="auth.isLoggedIn()">{{ auth.getRole() | uppercase }}</span>
+  <div class="navbar-right">
+    <button class="btn-primary" routerLink="/presupuestos/nuevo">
+      Nuevo presupuesto
+    </button>
     <button class="btn-logout" (click)="logout()">Cerrar sesión</button>
   </div>
 </nav>

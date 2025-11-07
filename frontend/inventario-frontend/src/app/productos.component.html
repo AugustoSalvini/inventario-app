@@ -1,32 +1,28 @@
 <div class="productos-layout card-appear">
-  <!-- HEADER -->
   <div class="productos-header">
     <h1 class="h1 productos-titulo">Productos</h1>
 
     <div class="productos-acciones">
+      <!-- Botones Presupuestos -->
+      <button routerLink="/presupuestos" class="btn-outline">Presupuestos</button>
+      <button routerLink="/presupuestos/nuevo" class="btn-secondary">Nuevo presupuesto</button>
+
+      <!-- Acciones existentes -->
       <button *ngIf="auth.canEdit()" class="btn-primary" (click)="nuevo()">Nuevo producto</button>
       <button class="btn-logout" (click)="logout()">Cerrar sesión</button>
     </div>
   </div>
 
-  <!-- BUSCADOR -->
+  <!-- Buscador -->
   <div class="productos-busqueda">
-    <input
-      type="text"
-      class="input"
-      placeholder="Buscar producto o código..."
-      [(ngModel)]="q"
-      (keyup.enter)="fetch()"
-    />
-    <button class="btn-primary" style="width:auto;" (click)="fetch()">Buscar</button>
+    <input type="text" class="input" placeholder="Buscar producto o código..." [(ngModel)]="q" (keyup.enter)="buscar()" />
+    <button class="btn-primary" style="width:auto;" (click)="buscar()">Buscar</button>
   </div>
 
-  <!-- FORMULARIO CENTRADO -->
-  <div class="auth-card centered" *ngIf="showForm">
-    <h3 class="h1">{{ editingId ? 'Editar producto' : 'Nuevo producto' }}</h3>
-    <p class="subtitle">
-      Completá los datos y guardá para {{ editingId ? 'actualizar' : 'crear' }} el producto.
-    </p>
+  <!-- Formulario inline -->
+  <div class="auth-card" *ngIf="showForm">
+    <h3 class="h1" style="margin-bottom:8px;">{{ editingId ? 'Editar producto' : 'Nuevo producto' }}</h3>
+    <p class="subtitle">Completá los datos y guardá para {{ editingId ? 'actualizar' : 'crear' }} el producto.</p>
 
     <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
       <div class="form-grid">
@@ -40,14 +36,10 @@
           <input type="text" class="auth-input" formControlName="nombre" placeholder="Ej: Taza cerámica" />
         </div>
 
-        <div class="auth-field full">
+        <div class="auth-field col-2">
           <label class="auth-label">Descripción</label>
-          <textarea
-            class="auth-input"
-            formControlName="descripcion"
-            rows="3"
-            placeholder="Detalles del producto…"
-          ></textarea>
+          <textarea class="auth-input" formControlName="descripcion" rows="3" placeholder="Detalles del producto…"
+                    style="height:auto;padding-top:10px;"></textarea>
         </div>
 
         <div class="auth-field">
@@ -60,47 +52,45 @@
           <input type="number" class="auth-input" formControlName="stock" min="0" step="1" />
         </div>
 
-        <div class="auth-field switch">
+        <div class="auth-field check-inline">
           <input id="activo" type="checkbox" formControlName="activo" />
-          <label class="auth-label" for="activo">Activo</label>
+          <label class="auth-label" for="activo" style="margin:0;">Activo</label>
         </div>
       </div>
 
-      <div class="auth-actions">
-        <button class="auth-btn" type="submit" [disabled]="loading">
+      <div class="auth-actions" style="display:flex;gap:10px;">
+        <button class="auth-btn" type="submit" [disabled]="loading || form.invalid">
           {{ loading ? 'Guardando…' : 'Guardar' }}
         </button>
         <button class="btn-logout" type="button" (click)="cancelarForm()">Cancelar</button>
       </div>
 
-      <div *ngIf="error" class="pf-alert error">
+      <div *ngIf="error" class="alert alert-error" style="margin-top:10px;">
         {{ error }}
       </div>
     </form>
   </div>
 
-  <!-- MENSAJES DE ESTADO -->
-  <div *ngIf="loading" class="text-muted" style="text-align:center;">Cargando...</div>
-  <div *ngIf="!loading && data.length === 0" class="text-muted" style="text-align:center;">
-    Sin resultados.
-  </div>
+  <!-- estados -->
+  <div *ngIf="loading" class="text-muted center">Cargando...</div>
+  <div *ngIf="!loading && data.length === 0" class="text-muted center">Sin resultados.</div>
+  <div *ngIf="!loading && error && !showForm" class="alert alert-error center">{{ error }}</div>
 
-  <!-- TABLA -->
+  <!-- Tabla -->
   <div class="productos-tabla" *ngIf="!loading && data.length">
     <table>
       <thead>
         <tr>
-          <th>ID</th>
-          <th>Código</th>
+          <th style="width:80px;">ID</th>
+          <th style="width:140px;">Código</th>
           <th>Nombre</th>
           <th>Descripción</th>
-          <th class="text-end">Precio</th>
-          <th class="text-end">Stock</th>
-          <th>Estado</th>
-          <th class="text-end">Acciones</th>
+          <th class="text-end" style="width:140px;">Precio</th>
+          <th class="text-end" style="width:110px;">Stock</th>
+          <th style="width:100px;">Estado</th>
+          <th class="text-end" style="width:360px;">Acciones</th>
         </tr>
       </thead>
-
       <tbody>
         <tr *ngFor="let p of data">
           <td>{{ p.id }}</td>
@@ -110,11 +100,20 @@
           <td class="text-end">{{ p.precio | number:'1.2-2' }}</td>
           <td class="text-end">{{ p.stock }}</td>
           <td>
-            <span class="badge" [ngClass]="p.activo ? 'badge-success' : 'badge-secondary'">
+            <span [class.text-bg-success]="p.activo" [class.text-bg-secondary]="!p.activo"
+                  style="padding:4px 8px; border-radius:8px; font-size:12px;">
               {{ p.activo ? 'Activo' : 'Inactivo' }}
             </span>
           </td>
           <td class="text-end acciones">
+            <!-- Botón directo a crear presupuesto con el producto preseleccionado -->
+            <button class="btn-accion teal"
+                    *ngIf="auth.canEdit()"
+                    [routerLink]="['/presupuestos/nuevo']"
+                    [queryParams]="{ productoId: p.id }">
+              Presupuesto
+            </button>
+
             <button class="btn-accion blue" *ngIf="auth.canEdit()" (click)="actualizarStock(p)">Stock</button>
             <button class="btn-accion gray" *ngIf="auth.canEdit()" (click)="editar(p)">Editar</button>
             <button class="btn-accion red" *ngIf="auth.canDelete()" (click)="eliminar(p)">Eliminar</button>

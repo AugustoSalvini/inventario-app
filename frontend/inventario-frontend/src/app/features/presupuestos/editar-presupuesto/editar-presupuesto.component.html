@@ -1,17 +1,35 @@
-<div class="productos-layout card-appear" style="max-width:720px">
-  <h2 class="h1">{{ id ? 'Editar presupuesto' : 'Nuevo presupuesto' }}</h2>
+<h2>Nuevo presupuesto</h2>
 
-  <form [formGroup]="form" (ngSubmit)="save()">
-    <div class="auth-field"><label class="auth-label">Cliente ID</label><input class="input" formControlName="cliente_id"/></div>
-    <div class="auth-field"><label class="auth-label">Total</label><input type="number" class="input" formControlName="total"/></div>
-    <div class="auth-field"><label class="auth-label">Estado</label><input class="input" formControlName="estado"/></div>
-    <div class="auth-field"><label class="auth-label">Notas</label><input class="input" formControlName="notas"/></div>
+<a routerLink="/presupuestos">Volver</a>
 
-    <div style="display:flex;gap:10px;">
-      <button class="btn-primary" type="submit" [disabled]="loading || form.invalid">{{ loading ? 'Guardando…' : 'Guardar' }}</button>
-      <a routerLink="/presupuestos" class="btn-logout" style="text-decoration:none;display:inline-flex;align-items:center;">Cancelar</a>
-    </div>
+<form [formGroup]="form" (ngSubmit)="save()">
+  <div>
+    <label>Cliente ID</label>
+    <input type="number" formControlName="cliente_id" />
+  </div>
 
-    <div *ngIf="error" style="color:#b42318;margin-top:10px;font-weight:600;">{{error}}</div>
-  </form>
-</div>
+  <div>
+    <label>Total</label>
+    <input type="number" formControlName="total" />
+  </div>
+
+  <div>
+    <label>Estado</label>
+    <select formControlName="estado">
+      <option value="borrador">borrador</option>
+      <option value="confirmado">confirmado</option>
+      <option value="cancelado">cancelado</option>
+    </select>
+  </div>
+
+  <div>
+    <label>Notas</label>
+    <textarea formControlName="notas" placeholder="Observaciones..."></textarea>
+  </div>
+
+  <!-- ...campos del formulario... -->
+  <button type="submit" [disabled]="loading">Guardar</button>
+  <button type="button" (click)="cancel()">Cancelar</button>
+
+  <p *ngIf="error" style="color:red">{{ error }}</p>
+</form>

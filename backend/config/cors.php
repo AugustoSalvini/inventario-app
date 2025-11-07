@@ -1,21 +1,18 @@
 <?php
 
 return [
-    // Para no fallar con rutas, probemos con todo
-    'paths' => ['*'],
-
+    'paths' => ['api/*', 'sanctum/csrf-cookie'],
     'allowed_methods' => ['*'],
 
-    // Como NO usamos credenciales (cookies) podemos abrir a cualquier origen
-    'allowed_origins' => ['*'],
-    'allowed_origins_patterns' => [],
+    // Se usa patterns para permitir cualquier puerto dinámico
+    'allowed_origins' => [],
+    'allowed_origins_patterns' => [
+        '#^http://localhost(:\d+)?$#',
+        '#^http://127\.0\.0\.1(:\d+)?$#',
+    ],
 
-    'allowed_headers' => ['*'],
-
-    'exposed_headers' => [],
-
-    'max_age' => 0,
-
-    // En dev con tokens Bearer, esto en false
-    'supports_credentials' => false,
+        'allowed_headers' => ['*'],
+            'exposed_headers' => [],
+     'max_age' => 0,
+        'supports_credentials' => true,
 ];
