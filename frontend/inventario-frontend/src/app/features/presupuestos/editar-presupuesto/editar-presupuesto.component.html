@@ -1,35 +1,50 @@
-<h2>Nuevo presupuesto</h2>
-
-<a routerLink="/presupuestos">Volver</a>
-
-<form [formGroup]="form" (ngSubmit)="save()">
-  <div>
-    <label>Cliente ID</label>
-    <input type="number" formControlName="cliente_id" />
+<!-- src/app/features/presupuestos/editar-presupuesto/editar-presupuesto.component.html -->
+<div class="page">
+  <div class="page-header">
+    <h1>{{ id ? 'Editar presupuesto' : 'Nuevo presupuesto' }}</h1>
+    <a routerLink="/presupuestos" class="btn-secondary">Volver</a>
   </div>
 
-  <div>
-    <label>Total</label>
-    <input type="number" formControlName="total" />
-  </div>
+  <form [formGroup]="form" (ngSubmit)="save()">
+    <div class="grid-2">
+      <div>
+        <label>Cliente ID</label>
+        <input type="number" formControlName="cliente_id" min="1">
+      </div>
+      <div>
+        <label>Estado</label>
+        <select formControlName="estado">
+          <option value="borrador">borrador</option>
+          <option value="confirmado">confirmado</option>
+          <option value="cancelado">cancelado</option>
+        </select>
+      </div>
+    </div>
 
-  <div>
-    <label>Estado</label>
-    <select formControlName="estado">
-      <option value="borrador">borrador</option>
-      <option value="confirmado">confirmado</option>
-      <option value="cancelado">cancelado</option>
-    </select>
-  </div>
+    <div>
+      <label>Notas</label>
+      <textarea formControlName="notas" rows="3"></textarea>
+    </div>
 
-  <div>
-    <label>Notas</label>
-    <textarea formControlName="notas" placeholder="Observaciones..."></textarea>
-  </div>
+    <h3>Ítems</h3>
+    <div formArrayName="items">
+      <div class="item-row" *ngFor="let it of items.controls; let i = index" [formGroupName]="i">
+        <input type="number" formControlName="producto_id" placeholder="producto_id (opcional)">
+        <input type="text" formControlName="descripcion" placeholder="Descripción (opcional)">
+        <input type="number" min="1" formControlName="cantidad" placeholder="Cantidad">
+        <input type="number" min="0" step="0.01" formControlName="precio_unitario" placeholder="Precio unitario">
+        <button type="button" class="btn-accion red" (click)="removeItem(i)">Quitar</button>
+      </div>
+    </div>
+    <button type="button" class="btn-accion blue" (click)="addItem()">Agregar ítem</button>
 
-  <!-- ...campos del formulario... -->
-  <button type="submit" [disabled]="loading">Guardar</button>
-  <button type="button" (click)="cancel()">Cancelar</button>
+    <div class="actions mt">
+      <button class="btn-primary" type="submit" [disabled]="saving || form.invalid">
+        {{ saving ? 'Guardando…' : 'Guardar' }}
+      </button>
+      <button type="button" class="btn-secondary" (click)="cancel()">Cancelar</button>
+    </div>
 
-  <p *ngIf="error" style="color:red">{{ error }}</p>
-</form>
+    <div *ngIf="error" class="error mt">{{ error }}</div>
+  </form>
+</div>

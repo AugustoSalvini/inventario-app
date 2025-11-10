@@ -1,1 +1,37 @@
-.box{padding:1rem} .item{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:8px} .total{margin:10px 0;font-weight:bold}
+/* src/app/features/presupuestos/editar-presupuesto/editar-presupuesto.component.css */
+.page { max-width: 980px; margin: 0 auto; padding: 24px; color: #e5e7eb; }
+.page-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
+.page-header h1 { font-size:28px; font-weight:800; margin:0; letter-spacing:.3px; }
+
+.grid-2 { display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:12px; }
+label { display:block; font-size:13px; color:#9ca3af; margin-bottom:6px; }
+input, select, textarea {
+  width:100%; height:40px; padding:8px 12px; border-radius:10px; border:1px solid #2a2f3a;
+  background:#0b1220; color:#e5e7eb; outline:none;
+}
+textarea { height:auto; }
+
+.item-row {
+  display:grid;
+  grid-template-columns: 140px 1fr 120px 140px 100px;
+  gap:10px; margin-bottom:10px; align-items:center;
+}
+
+.actions { display:flex; gap:10px; align-items:center; }
+.mt { margin-top:12px; }
+.error { color:#fca5a5; font-weight:700; }
+
+.btn-primary, .btn-secondary, .btn-accion {
+  display:inline-flex; align-items:center; justify-content:center; height:40px; padding:0 14px;
+  border-radius:10px; border:0; cursor:pointer; font-weight:600; text-decoration:none; user-select:none;
+}
+.btn-primary{ background:#2563eb; color:#fff; }
+.btn-secondary{ background:#1f2937; color:#e5e7eb; }
+.btn-accion{ background:#111827; color:#e5e7eb; padding:8px 12px; height:auto; border-radius:8px; }
+.btn-accion.blue{ background:#1d4ed8; }
+.btn-accion.red{ background:#b91c1c; }
+
+@media (max-width: 860px) {
+  .grid-2 { grid-template-columns: 1fr; }
+  .item-row { grid-template-columns: 1fr; }
+}

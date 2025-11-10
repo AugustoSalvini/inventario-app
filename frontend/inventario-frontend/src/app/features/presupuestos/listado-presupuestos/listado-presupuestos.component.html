@@ -1,37 +1,52 @@
-<h2>Presupuestos</h2>
+<!-- src/app/features/presupuestos/listado-presupuestos/listado-presupuestos.component.html -->
+<div class="page">
+  <div class="page-header">
+    <h1>Presupuestos</h1>
+    <div class="actions">
+      <button *ngIf="auth.canEdit()" class="btn-primary" (click)="nuevo()">Nuevo presupuesto</button>
+      <a routerLink="/productos" class="btn-secondary">Volver a productos</a>
+    </div>
+  </div>
 
-<div style="display:flex; gap:1rem; align-items:center">
-  <a routerLink="/productos">Volver a productos</a>
-  <input placeholder="Buscar por id o estado..." [(ngModel)]="q" />
-  <button (click)="buscar()">Buscar</button>
-  <a routerLink="/presupuestos/nuevo">Nuevo presupuesto</a>
+  <div class="search-bar">
+    <input [(ngModel)]="q" placeholder="Buscar por cliente/estado/ID" (keyup.enter)="buscar()">
+    <button class="btn-primary" (click)="buscar()">Buscar</button>
+  </div>
+
+  <div *ngIf="loading" class="muted">Cargando…</div>
+  <div *ngIf="!loading && error" class="error">{{ error }}</div>
+  <div *ngIf="!loading && !data.length" class="muted">Sin resultados</div>
+
+  <table *ngIf="!loading && data.length">
+    <thead>
+      <tr>
+        <th style="width:80px;">ID</th>
+        <th>Cliente</th>
+        <th style="width:140px;">Estado</th>
+        <th class="text-end" style="width:150px;">Total</th>
+        <th style="width:180px;">Creado</th>
+        <th class="text-end" style="width:280px;">Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let p of data">
+        <td>{{ p.id }}</td>
+        <td>{{ p.cliente?.nombre || '-' }}</td>
+        <td>
+          <span class="badge"
+            [class.success]="p.estado==='confirmado'"
+            [class.warn]="p.estado==='borrador'"
+            [class.danger]="p.estado==='cancelado'">
+            {{ p.estado }}
+          </span>
+        </td>
+        <td class="text-end">{{ p.total | number:'1.2-2' }}</td>
+        <td>{{ p.created_at | date:'short' }}</td>
+        <td class="text-end">
+          <a class="btn-accion gray" (click)="editar(p.id)">Editar</a>
+          <a *ngIf="auth.canDelete()" class="btn-accion red" (click)="eliminar(p.id)">Eliminar</a>
+        </td>
+      </tr>
+    </tbody>
+  </table>
 </div>
-
-<p *ngIf="loading">Cargando...</p>
-<p *ngIf="error" style="color:red">{{ error }}</p>
-<p *ngIf="!loading && !error && data.length === 0">Sin resultados.</p>
-
-<table *ngIf="!loading && !error && data.length > 0" border="1" cellpadding="6">
-  <thead>
-    <tr>
-      <th>ID</th>
-      <th>Cliente ID</th>
-      <th>Total</th>
-      <th>Estado</th>
-      <th>Notas</th>
-      <th>Acciones</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr *ngFor="let p of data">
-      <td>{{ p.id }}</td>
-      <td>{{ p.cliente_id }}</td>
-      <td>{{ p.total | number:'1.2-2' }}</td>
-      <td>{{ p.estado }}</td>
-      <td>{{ p.notas || '-' }}</td>
-      <td>
-        <a [routerLink]="['/presupuestos', p.id, 'editar']">Editar</a>
-      </td>
-    </tr>
-  </tbody>
-</table>

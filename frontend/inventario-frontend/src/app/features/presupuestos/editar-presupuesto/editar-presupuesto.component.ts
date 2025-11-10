@@ -1,59 +1,99 @@
 // src/app/features/presupuestos/editar-presupuesto/editar-presupuesto.component.ts
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, ReactiveFormsModule, Validators, FormGroup } from '@angular/forms';
-import { RouterLink, Router } from '@angular/router';
-import { PresupuestosApi, PresupuestoPayload, PresupuestoEstado } from '../presupuestos.api';
+import { FormBuilder, Validators, ReactiveFormsModule, FormArray, FormGroup } from '@angular/forms';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { PresupuestosApi, Presupuesto, PresupuestoPayload, PresupuestoItem, PresupuestoEstado } from '../presupuestos.api';
 
 @Component({
   selector: 'app-editar-presupuesto',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './editar-presupuesto.component.html',
-  styleUrls: ['./editar-presupuesto.component.css'],   // <- CSS
-  })
-  export class EditarPresupuestoComponent implements OnInit {
-  form!: FormGroup;
-  loading = false;
+  styleUrls: ['./editar-presupuesto.component.css'],
+})
+export class EditarPresupuestoComponent {
+  id?: number;
+  saving = false;
   error = '';
-  id: number | null = null; // si lo usás para edición
+
+  form: FormGroup;
+
+  get items(): FormArray { return this.form.get('items') as FormArray; }
 
   constructor(
     private fb: FormBuilder,
+    private route: ActivatedRoute,
+    private router: Router,
     private api: PresupuestosApi,
-    private router: Router
   ) {
-    // ✅ Crear el form DESPUÉS de tener fb inyectado
-    this.form = this.fb.nonNullable.group({
-      cliente_id: [0,  [Validators.required, Validators.min(1)]],
-      total:      [0,  [Validators.required, Validators.min(0)]],
-      estado:     ['borrador' as PresupuestoEstado, [Validators.required]],
-      notas:      [''],
+    this.form = this.fb.group({
+      cliente_id: [null, [Validators.required]],
+      estado: ['borrador' as PresupuestoEstado],
+      notas: [''],
+      items: this.fb.array([]),
+    });
+
+    const rawId = this.route.snapshot.paramMap.get('id');
+    this.id = rawId ? Number(rawId) : undefined;
+
+    if (this.id) {
+      this.api.show(this.id).subscribe({
+        next: (p: Presupuesto) => {
+          this.form.patchValue({
+            cliente_id: p.cliente_id,
+            estado: p.estado,
+            notas: p.notas ?? '',
+          });
+          (p.items ?? []).forEach(it => this.items.push(this.itemGroup(it)));
+        },
+        error: () => this.error = 'No se pudo cargar el presupuesto'
+      });
+    } else {
+      // ítem por defecto
+      this.items.push(this.itemGroup({ cantidad: 1, precio_unitario: 0 }));
+    }
+  }
+
+  private itemGroup(it: Partial<PresupuestoItem>) {
+    return this.fb.group({
+      producto_id: [it.producto_id ?? null],
+      descripcion: [it.descripcion ?? null],
+      cantidad:    [it.cantidad ?? 1, [Validators.required, Validators.min(1)]],
+      precio_unitario: [it.precio_unitario ?? 0, [Validators.required, Validators.min(0)]],
     });
   }
 
-  ngOnInit(): void {
-    // si estás editando, acá cargarías el presupuesto y harías this.form.reset(...)
-  }
+  addItem() { this.items.push(this.itemGroup({ cantidad: 1, precio_unitario: 0 })); }
+  removeItem(i: number) { this.items.removeAt(i); }
 
-  save(): void {
+  save() {
     if (this.form.invalid) return;
+    this.saving = true;
+    this.error = '';
 
-    const v = this.form.getRawValue();
+    const v = this.form.value;
+
     const payload: PresupuestoPayload = {
-      cliente_id: Number(v.cliente_id),
-      total: Number(v.total),
-      estado: v.estado as PresupuestoEstado,
-      notas: (v.notas || '').trim() || null,
+      cliente_id: Number(v.cliente_id),                         // 👈 requerido por backend
+      estado: (v.estado as PresupuestoEstado) || 'borrador',
+      notas: (v.notas ?? '') || null,
+      items: (v.items || []).map((it: any) => ({
+        producto_id: it.producto_id ? Number(it.producto_id) : null,
+        descripcion: (it.descripcion ?? '') || null,
+        cantidad: Number(it.cantidad),
+        // normalizamos coma a punto para evitar 422 por string/locale
+        precio_unitario: Number(String(it.precio_unitario).toString().replace(',', '.')),
+      })),
     };
 
-    this.loading = true;
-    const obs = this.id ? this.api.update(this.id, payload) : this.api.create(payload);
-    obs.subscribe({
-      next: () => { this.loading = false; this.router.navigate(['/presupuestos']); },
-      error: () => { this.loading = false; this.error = 'No se pudo guardar el presupuesto'; },
+    const req = this.id ? this.api.update(this.id, payload) : this.api.create(payload);
+
+    req.subscribe({
+      next: () => { this.saving = false; this.router.navigate(['/presupuestos']); },
+      error: () => { this.saving = false; this.error = 'No se pudo guardar el presupuesto'; },
     });
   }
 
-  cancel(): void { this.router.navigate(['/presupuestos']); }
+  cancel() { this.router.navigate(['/presupuestos']); }
 }

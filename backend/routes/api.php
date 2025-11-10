@@ -5,7 +5,9 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\PresupuestoController;
 
-// Auth
+// =========================
+// AUTH
+// =========================
 Route::prefix('auth')->group(function () {
     Route::post('register', [AuthController::class, 'register']);
     Route::post('login',    [AuthController::class, 'login']);
@@ -13,19 +15,14 @@ Route::prefix('auth')->group(function () {
     Route::get('me',        [AuthController::class, 'me'])->middleware('auth:sanctum');
 });
 
-// Productos (solo auth por ahora)
+// =========================
+// PROTECTED API
+// =========================
 Route::middleware('auth:sanctum')->group(function () {
-    Route::get   ('/productos',                     [ProductoController::class, 'index']);
-    Route::post  ('/productos',                     [ProductoController::class, 'store']);
-    Route::get   ('/productos/{producto}',          [ProductoController::class, 'show']);
-    Route::put   ('/productos/{producto}',          [ProductoController::class, 'update']);
-    Route::delete('/productos/{producto}',          [ProductoController::class, 'destroy']);
-    Route::patch ('/productos/{producto}/stock',    [ProductoController::class, 'updateStock']);
-    Route::apiResource('presupuestos', PresupuestoController::class);
-    Route::get   ('/presupuestos',               [PresupuestoController::class, 'index']);
-    Route::post  ('/presupuestos',               [PresupuestoController::class, 'store']);
-    Route::get   ('/presupuestos/{presupuesto}', [PresupuestoController::class, 'show']);
-    Route::put   ('/presupuestos/{presupuesto}', [PresupuestoController::class, 'update']);
-    Route::delete('/presupuestos/{presupuesto}', [PresupuestoController::class, 'destroy']);
-});
+    // Productos
+    Route::apiResource('productos', ProductoController::class);
+    Route::put('productos/{producto}/stock', [ProductoController::class, 'updateStock']); // o PATCH si preferís
 
+    // Presupuestos
+    Route::apiResource('presupuestos', PresupuestoController::class);
+});

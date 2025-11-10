@@ -79,6 +79,11 @@ export class ProductosComponent implements OnInit {
     this.form.reset({ codigo: '', nombre: '', descripcion: '', precio: 0, stock: 0, activo: true });
   }
 
+  /** 🔧 Normaliza los valores numéricos (quita separadores de miles, corrige comas) */
+  private parseDecimal(x: any): number {
+    return Number(String(x).replace(/\./g, '').replace(',', '.'));
+  }
+
   submit(): void {
     if (this.form.invalid || !this.auth.canEdit()) return;
     this.loading = true;
@@ -89,7 +94,7 @@ export class ProductosComponent implements OnInit {
       codigo:      v.codigo?.trim() || null,
       nombre:      v.nombre.trim(),
       descripcion: (v.descripcion || '').trim() || null,
-      precio:      Number(v.precio),
+      precio:      this.parseDecimal(v.precio),  // 👈 normaliza punto/coma
       stock:       Number(v.stock),
       activo:      !!v.activo,
     };
@@ -99,8 +104,28 @@ export class ProductosComponent implements OnInit {
       : this.api.create(payload);
 
     obs.subscribe({
-      next: () => { this.loading = false; this.showForm = false; this.editingId = null; this.fetch(); },
-      error: () => { this.loading = false; this.error = this.editingId ? 'No se pudo actualizar el producto' : 'No se pudo crear el producto'; },
+      next: () => {
+        this.loading = false;
+        this.showForm = false;
+        this.editingId = null;
+        this.fetch();
+      },
+      error: (err) => {
+        this.loading = false;
+
+        // Manejo de errores del backend (422, etc.)
+        const be = err?.error;
+        if (be?.errors) {
+          const first = Object.values(be.errors)[0] as string[];
+          this.error = first?.[0] || 'Error al guardar el producto';
+        } else if (be?.message) {
+          this.error = be.message;
+        } else {
+          this.error = this.editingId
+            ? 'No se pudo actualizar el producto'
+            : 'No se pudo crear el producto';
+        }
+      },
     });
   }
 

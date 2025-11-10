@@ -20,8 +20,6 @@ class ProductoController extends Controller
                 $query->where(function ($sub) use ($q) {
                     $sub->where('nombre', 'ilike', "%{$q}%")
                         ->orWhere('codigo', 'ilike', "%{$q}%");
-
-                    // ✅ Evita error de tipo al comparar ID con texto
                     if (ctype_digit($q)) {
                         $sub->orWhere('id', (int) $q);
                     }
@@ -43,25 +41,28 @@ class ProductoController extends Controller
     public function store(Request $request)
     {
         try {
+            // ✅ VALIDACIÓN SÓLO DE PRODUCTOS
             $data = $request->validate([
-                'codigo'      => 'required|string|max:50|unique:productos,codigo',
-                'nombre'      => 'required|string|max:255',
-                'descripcion' => 'nullable|string',
-                'precio'      => 'required|numeric|min:0',
-                'stock'       => 'required|integer|min:0',
-                'activo'      => 'boolean',
+                'codigo'      => ['nullable','string','max:50','unique:productos,codigo'],
+                'nombre'      => ['required','string','max:255'],
+                'descripcion' => ['nullable','string'],
+                'precio'      => ['required','numeric','min:0'],
+                'stock'       => ['required','integer','min:0'],
+                'activo'      => ['boolean'],
             ]);
 
+            // Normalizaciones
             $data['precio'] = (float) $data['precio'];
             $data['stock']  = (int)   $data['stock'];
             $data['activo'] = (bool) ($data['activo'] ?? true);
 
             $p = Producto::create($data);
-
             return response()->json($p, 201);
+
         } catch (ValidationException $ve) {
             return response()->json(['errors' => $ve->errors()], 422);
         } catch (QueryException $e) {
+            // clave única (pgsql)
             if ($e->getCode() === '23505') {
                 return response()->json(['message' => 'El código ya existe'], 422);
             }
@@ -77,12 +78,12 @@ class ProductoController extends Controller
     {
         try {
             $data = $request->validate([
-                'codigo'      => "sometimes|string|max:50|unique:productos,codigo,{$producto->id}",
-                'nombre'      => 'sometimes|string|max:255',
-                'descripcion' => 'sometimes|nullable|string',
-                'precio'      => 'sometimes|numeric|min:0',
-                'stock'       => 'sometimes|integer|min:0',
-                'activo'      => 'sometimes|boolean',
+                'codigo'      => ['sometimes','string','max:50','unique:productos,codigo,'.$producto->id],
+                'nombre'      => ['sometimes','string','max:255'],
+                'descripcion' => ['sometimes','nullable','string'],
+                'precio'      => ['sometimes','numeric','min:0'],
+                'stock'       => ['sometimes','integer','min:0'],
+                'activo'      => ['sometimes','boolean'],
             ]);
 
             if (isset($data['precio'])) $data['precio'] = (float) $data['precio'];
@@ -91,6 +92,7 @@ class ProductoController extends Controller
 
             $producto->update($data);
             return response()->json($producto);
+
         } catch (ValidationException $ve) {
             return response()->json(['errors' => $ve->errors()], 422);
         } catch (\Throwable $e) {
@@ -103,10 +105,12 @@ class ProductoController extends Controller
     {
         try {
             $data = $request->validate([
-                'stock' => ['required', 'integer', 'min:0'],
+                'stock' => ['required','integer','min:0'],
             ]);
+
             $producto->update(['stock' => (int) $data['stock']]);
             return response()->json($producto);
+
         } catch (ValidationException $ve) {
             return response()->json(['errors' => $ve->errors()], 422);
         } catch (\Throwable $e) {
@@ -118,7 +122,7 @@ class ProductoController extends Controller
     public function destroy(Producto $producto)
     {
         try {
-            $producto->delete(); // SoftDeletes
+            $producto->delete();
             return response()->json(['ok' => true]);
         } catch (\Throwable $e) {
             Log::error('Productos@destroy error', ['e' => $e]);

@@ -4,27 +4,41 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\User;
+use App\Models\Cliente;
+use App\Models\Producto;
 use App\Models\Presupuesto;
+use App\Models\PresupuestoItem;
 
 class PresupuestoSeeder extends Seeder
 {
     public function run(): void
     {
-        $admin = User::where('email', 'admin@demo.com')->first();
+        $user = User::first();
+        $cliente = Cliente::first();
+        $prod = Producto::first();
 
-        if (!$admin) return;
+        if (!$user || !$cliente || !$prod) return;
 
-        $ejemplos = [
-            ['cliente_id' => 1, 'estado' => 'borrador',   'total' => 12000, 'notas' => 'Primera visita.'],
-            ['cliente_id' => 2, 'estado' => 'confirmado', 'total' =>  8500, 'notas' => 'Entrega en 48hs.'],
-            ['cliente_id' => 3, 'estado' => 'cancelado',  'total' =>  5000, 'notas' => 'Cliente desistió.'],
-        ];
+        $p = Presupuesto::create([
+            'user_id'    => $user->id,
+            'cliente_id' => $cliente->id,
+            'estado'     => 'borrador',
+            'notas'      => 'Ejemplo inicial',
+            'total'      => 0,
+        ]);
 
-        foreach ($ejemplos as $e) {
-            Presupuesto::updateOrCreate(
-                ['cliente_id' => $e['cliente_id'], 'estado' => $e['estado'], 'total' => $e['total']],
-                $e + ['user_id' => $admin->id]
-            );
-        }
+        $subtotal = 2 * 1500.00;
+
+        PresupuestoItem::create([
+            'presupuesto_id' => $p->id,
+            'producto_id'    => $prod->id,
+            'descripcion'    => 'Item ejemplo',
+            'cantidad'       => 2,
+            'precio_unitario'=> 1500.00,
+            'subtotal'       => $subtotal,
+        ]);
+
+        // 🔥 recalcula total correctamente
+        $p->recalcularTotal();
     }
 }

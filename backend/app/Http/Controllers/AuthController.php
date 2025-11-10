@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Cliente; 
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -23,39 +24,48 @@ class AuthController extends Controller
         return $map[$r] ?? 'usuario';
     }
 
-    public function register(Request $request)
+      public function register(Request $request)
     {
-        $data = $request->validate([
-            'name'     => ['required','string','max:255'],
-            'email'    => ['required','email','max:255','unique:users,email'],
-            'password' => ['required','string','min:6'],
-            'role'     => ['nullable','string'], // opcional
-        ]);
+        try {
+            $data = $request->validate([
+                'name'     => 'required|string|max:255',
+                'email'    => 'required|email|unique:users,email',
+                'password' => 'required|string|min:6',
+                'role'     => 'nullable|in:admin,empleado,usuario',
+            ]);
 
-        $role = $this->normalizeRole($data['role'] ?? 'usuario');
+            $user = User::create([
+                'name'     => $data['name'],
+                'email'    => $data['email'],
+                'password' => Hash::make($data['password']),
+                'role'     => $data['role'] ?? 'usuario',
+            ]);
 
-        $user = User::create([
-            'name'     => $data['name'],
-            'email'    => $data['email'],
-            'password' => Hash::make($data['password']),
-            // En tu BD la columna suele llamarse "role". Si la tuya es "rol", ajusta el índice de fillable y aquí.
-            'role'     => $role,
-        ]);
+            // 🔽 Auto-crear su Cliente asociado
+            Cliente::create([
+                'user_id'  => $user->id,
+                'nombre'   => $user->name,
+                'telefono' => null,
+                'email'    => $user->email,
+                'direccion'=> null,
+            ]);
 
-        $token = $user->createToken('auth')->plainTextToken;
+            $token = $user->createToken('api')->plainTextToken;
 
-        return response()->json([
-            'access_token' => $token,
-            'token_type'   => 'bearer',
-            'user'         => [
-                'id'    => $user->id,
-                'name'  => $user->name,
-                'email' => $user->email,
-                'role'  => $user->role,   // clave canónica
-                'rol'   => $user->role,   // alias por compatibilidad con frontend
-            ],
-        ], 201);
+            return response()->json([
+                'user'  => $user,
+                'token' => $token,
+            ], 201);
+
+        } catch (ValidationException $ve) {
+            return response()->json(['errors' => $ve->errors()], 422);
+        } catch (\Throwable $e) {
+            // log simple para depurar si querés
+            // \Log::error('Register error', ['e' => $e]);
+            return response()->json(['message' => 'No se pudo registrar'], 500);
+        }
     }
+
 
     public function login(Request $request)
     {

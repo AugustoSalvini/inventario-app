@@ -3,24 +3,27 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class PresupuestoItem extends Model
 {
+    use HasFactory;
+
     protected $table = 'presupuesto_items';
 
     protected $fillable = [
         'presupuesto_id',
         'producto_id',
+        'descripcion',
         'cantidad',
         'precio_unitario',
         'subtotal',
-        'descripcion',
     ];
 
     protected $casts = [
-        'cantidad'       => 'int',
-        'precio_unitario'=> 'float',
-        'subtotal'       => 'float',
+        'cantidad' => 'integer',
+        'precio_unitario' => 'decimal:2',
+        'subtotal' => 'decimal:2',
     ];
 
     public function presupuesto()
