@@ -1,50 +1,102 @@
-<!-- src/app/features/presupuestos/listado-presupuestos/listado-presupuestos.component.html -->
 <div class="page">
   <div class="page-header">
     <h1>Presupuestos</h1>
     <div class="actions">
-      <button *ngIf="auth.canEdit()" class="btn-primary" (click)="nuevo()">Nuevo presupuesto</button>
-      <a routerLink="/productos" class="btn-secondary">Volver a productos</a>
+      <!-- Botón para crear un nuevo presupuesto -->
+      <button
+        type="button"
+        class="btn-primary"
+        (click)="nuevo()"
+      >
+        Nuevo presupuesto
+      </button>
+
+      <!-- Link para volver a la pantalla de productos -->
+      <a routerLink="/productos" class="btn-secondary">
+        Volver a productos
+      </a>
     </div>
   </div>
 
-  <div class="search-bar">
-    <input [(ngModel)]="q" placeholder="Buscar por cliente/estado/ID" (keyup.enter)="buscar()">
-    <button class="btn-primary" (click)="buscar()">Buscar</button>
+  <!-- Barra de búsqueda solo para empleado y admin -->
+  <div class="search-bar" *ngIf="auth.getRole() !== 'user'">
+    <input
+      type="text"
+      name="q"
+      [(ngModel)]="q"
+      placeholder="Buscar por Cliente/ID"
+      (keyup.enter)="buscar()"
+    />
+    <button
+      type="button"
+      class="btn-primary"
+      (click)="buscar()"
+    >
+      Buscar
+    </button>
   </div>
 
-  <div *ngIf="loading" class="muted">Cargando…</div>
-  <div *ngIf="!loading && error" class="error">{{ error }}</div>
-  <div *ngIf="!loading && !data.length" class="muted">Sin resultados</div>
+  <!-- Mensajes de estado (carga, error, sin datos) solo para empleado y admin -->
+  <div *ngIf="auth.getRole() !== 'user' && loading" class="muted">Cargando…</div>
+  <div *ngIf="auth.getRole() !== 'user' && !loading && error" class="error">{{ error }}</div>
+  <div *ngIf="auth.getRole() !== 'user' && !loading && !data.length" class="muted">Sin resultados</div>
 
-  <table *ngIf="!loading && data.length">
+  <!-- Tabla de presupuestos, oculta para el rol user -->
+  <table *ngIf="auth.getRole() !== 'user' && !loading && data.length">
     <thead>
       <tr>
         <th style="width:80px;">ID</th>
-        <th>Cliente</th>
+        <th>Usuario</th>
         <th style="width:140px;">Estado</th>
         <th class="text-end" style="width:150px;">Total</th>
-        <th style="width:180px;">Creado</th>
+        <th style="width:180px;">Fecha</th>
         <th class="text-end" style="width:280px;">Acciones</th>
       </tr>
     </thead>
     <tbody>
       <tr *ngFor="let p of data">
         <td>{{ p.id }}</td>
-        <td>{{ p.cliente?.nombre || '-' }}</td>
+
+        <!-- Muestro primero el usuario que lo creó y si no está uso el nombre del cliente -->
+        <td>{{ p.user?.name || p.cliente?.nombre || '-' }}</td>
+
+        <!-- Badge de estado del presupuesto con estilos según el valor -->
         <td>
           <span class="badge"
-            [class.success]="p.estado==='confirmado'"
-            [class.warn]="p.estado==='borrador'"
-            [class.danger]="p.estado==='cancelado'">
+            [ngClass]="{
+              'warn':     p.estado === 'borrador',
+              'info':     p.estado === 'enviado',
+              'success':  p.estado === 'aceptado',
+              'danger':   p.estado === 'rechazado',
+              'expired':  p.estado === 'vencido'
+            }">
             {{ p.estado }}
           </span>
         </td>
+
+        <!-- Total formateado con dos decimales -->
         <td class="text-end">{{ p.total | number:'1.2-2' }}</td>
         <td>{{ p.created_at | date:'short' }}</td>
         <td class="text-end">
-          <a class="btn-accion gray" (click)="editar(p.id)">Editar</a>
-          <a *ngIf="auth.canDelete()" class="btn-accion red" (click)="eliminar(p.id)">Eliminar</a>
+
+          <!-- Ver/editar presupuesto disponible para roles que pueden editar -->
+          <a
+            *ngIf="auth.canEdit()"
+            class="btn-accion gray"
+            (click)="editar(p.id)"
+          >
+            Ver / Editar
+          </a>
+
+          <!-- Eliminar presupuesto solo para el rol admin -->
+          <a
+            *ngIf="auth.canDelete()"
+            class="btn-accion red"
+            (click)="eliminar(p.id)"
+          >
+            Eliminar
+          </a>
+
         </td>
       </tr>
     </tbody>

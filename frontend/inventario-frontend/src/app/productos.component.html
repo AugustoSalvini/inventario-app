@@ -1,125 +1,152 @@
-<div class="productos-layout card-appear">
-  <div class="productos-header">
-    <h1 class="h1 productos-titulo">Productos</h1>
+<div class="productos-container">
+  <!-- ===== Sidebar izquierda ===== -->
+  <nav class="sidebar">
+    <div class="sidebar-logo">
+      <img src="/logoInventario.png" alt="Inventario App" class="sidebar-logo-img" />
+    </div>
 
-    <div class="productos-acciones">
-      <!-- Botones Presupuestos -->
-      <button routerLink="/presupuestos" class="btn-outline">Presupuestos</button>
-      <button routerLink="/presupuestos/nuevo" class="btn-secondary">Nuevo presupuesto</button>
+    <ul class="sidebar-menu">
+      <!-- Empleado / Admin: pueden ver listado de presupuestos y crear -->
+      <li *ngIf="!auth.isUser()">
+        <a routerLink="/presupuestos" class="nav-btn">Presupuestos</a>
+      </li>
+      <li *ngIf="!auth.isUser()">
+        <a routerLink="/presupuestos/nuevo" class="nav-btn">Nuevo presupuesto</a>
+      </li>
 
-      <!-- Acciones existentes -->
-      <button *ngIf="auth.canEdit()" class="btn-primary" (click)="nuevo()">Nuevo producto</button>
+      <!-- Usuario: SOLO puede enviar un presupuesto -->
+      <li *ngIf="auth.isUser()">
+        <a routerLink="/presupuestos/nuevo" class="nav-btn">Enviar presupuesto</a>
+      </li>
+    </ul>
+
+    <!-- Botón Cerrar sesión al final -->
+    <div class="sidebar-footer">
       <button class="btn-logout" (click)="logout()">Cerrar sesión</button>
     </div>
-  </div>
+  </nav>
 
-  <!-- Buscador -->
-  <div class="productos-busqueda">
-    <input type="text" class="input" placeholder="Buscar producto o código..." [(ngModel)]="q" (keyup.enter)="buscar()" />
-    <button class="btn-primary" style="width:auto;" (click)="buscar()">Buscar</button>
-  </div>
+  <!-- Contenido principal -->
+  <div class="productos-main card-appear">
+    <header class="top-bar">
+      <div>
+        <h2 class="section-subtitle">Productos</h2>
+      </div>
+    </header>
 
-  <!-- Formulario inline -->
-  <div class="auth-card" *ngIf="showForm">
-    <h3 class="h1" style="margin-bottom:8px;">{{ editingId ? 'Editar producto' : 'Nuevo producto' }}</h3>
-    <p class="subtitle">Completá los datos y guardá para {{ editingId ? 'actualizar' : 'crear' }} el producto.</p>
-
-    <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
-      <div class="form-grid">
-        <div class="auth-field">
-          <label class="auth-label">Código</label>
-          <input type="text" class="auth-input" formControlName="codigo" placeholder="Ej: P-001" />
-        </div>
-
-        <div class="auth-field">
-          <label class="auth-label">Nombre</label>
-          <input type="text" class="auth-input" formControlName="nombre" placeholder="Ej: Taza cerámica" />
-        </div>
-
-        <div class="auth-field col-2">
-          <label class="auth-label">Descripción</label>
-          <textarea class="auth-input" formControlName="descripcion" rows="3" placeholder="Detalles del producto…"
-                    style="height:auto;padding-top:10px;"></textarea>
-        </div>
-
-        <div class="auth-field">
-          <label class="auth-label">Precio</label>
-          <input type="number" class="auth-input" formControlName="precio" min="0" step="0.01" />
-        </div>
-
-        <div class="auth-field">
-          <label class="auth-label">Stock</label>
-          <input type="number" class="auth-input" formControlName="stock" min="0" step="1" />
-        </div>
-
-        <div class="auth-field check-inline">
-          <input id="activo" type="checkbox" formControlName="activo" />
-          <label class="auth-label" for="activo" style="margin:0;">Activo</label>
-        </div>
+    <div class="main-content">
+      <!-- Botón centrado de nuevo producto: SOLO para empleados/admin -->
+      <div class="nuevo-producto-container" *ngIf="auth.canEdit()">
+        <button class="btn-primary" (click)="nuevo()">Nuevo Producto</button>
       </div>
 
-      <div class="auth-actions" style="display:flex;gap:10px;">
-        <button class="auth-btn" type="submit" [disabled]="loading || form.invalid">
-          {{ loading ? 'Guardando…' : 'Guardar' }}
-        </button>
-        <button class="btn-logout" type="button" (click)="cancelarForm()">Cancelar</button>
+      <!-- Buscador -->
+      <div class="productos-busqueda">
+        <input
+          type="text"
+          class="input"
+          placeholder="Buscar producto o código..."
+          [(ngModel)]="q"
+          (keyup.enter)="fetch()"
+        />
+        <button class="btn-secondary" (click)="fetch()">Buscar</button>
       </div>
 
-      <div *ngIf="error" class="alert alert-error" style="margin-top:10px;">
-        {{ error }}
-      </div>
-    </form>
-  </div>
+      <!-- === Formulario inline (aparece al crear/editar) === -->
+      <div class="auth-card" *ngIf="showForm && auth.canEdit()" style="margin-bottom: 18px;">
+        <h3 class="h1" style="margin-bottom:8px;">
+          {{ editingId ? 'Editar producto' : 'Nuevo producto' }}
+        </h3>
+        <p class="subtitle" style="margin-bottom:14px;">
+          Completá los datos y guardá para {{ editingId ? 'actualizar' : 'crear' }} el producto.
+        </p>
 
-  <!-- estados -->
-  <div *ngIf="loading" class="text-muted center">Cargando...</div>
-  <div *ngIf="!loading && data.length === 0" class="text-muted center">Sin resultados.</div>
-  <div *ngIf="!loading && error && !showForm" class="alert alert-error center">{{ error }}</div>
+        <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+          <div class="form-grid" style="display:grid; gap:12px; grid-template-columns: 1fr 1fr;">
+            <div style="display:grid; gap:8px;">
+              <label class="auth-label">Código</label>
+              <input type="text" class="input" formControlName="codigo" placeholder="Ej: P-001" />
+            </div>
 
-  <!-- Tabla -->
-  <div class="productos-tabla" *ngIf="!loading && data.length">
-    <table>
-      <thead>
-        <tr>
-          <th style="width:80px;">ID</th>
-          <th style="width:140px;">Código</th>
-          <th>Nombre</th>
-          <th>Descripción</th>
-          <th class="text-end" style="width:140px;">Precio</th>
-          <th class="text-end" style="width:110px;">Stock</th>
-          <th style="width:100px;">Estado</th>
-          <th class="text-end" style="width:360px;">Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let p of data">
-          <td>{{ p.id }}</td>
-          <td>{{ p.codigo || '-' }}</td>
-          <td>{{ p.nombre }}</td>
-          <td>{{ p.descripcion || '-' }}</td>
-          <td class="text-end">{{ p.precio | number:'1.2-2' }}</td>
-          <td class="text-end">{{ p.stock }}</td>
-          <td>
-            <span [class.text-bg-success]="p.activo" [class.text-bg-secondary]="!p.activo"
-                  style="padding:4px 8px; border-radius:8px; font-size:12px;">
-              {{ p.activo ? 'Activo' : 'Inactivo' }}
-            </span>
-          </td>
-          <td class="text-end acciones">
-            <!-- Botón directo a crear presupuesto con el producto preseleccionado -->
-            <button class="btn-accion teal"
-                    *ngIf="auth.canEdit()"
-                    [routerLink]="['/presupuestos/nuevo']"
-                    [queryParams]="{ productoId: p.id }">
-              Presupuesto
+            <div style="display:grid; gap:8px;">
+              <label class="auth-label">Nombre</label>
+              <input type="text" class="input" formControlName="nombre" placeholder="Ej: Taza cerámica" />
+            </div>
+
+            <div style="grid-column: 1 / -1; display:grid; gap:8px;">
+              <label class="auth-label">Descripción</label>
+              <textarea class="input" formControlName="descripcion" rows="3" placeholder="Detalles del producto…"
+                        style="height:auto;padding-top:10px;"></textarea>
+            </div>
+
+            <div style="display:grid; gap:8px;">
+              <label class="auth-label">Precio</label>
+              <input type="number" class="input" formControlName="precio" min="0" step="0.01" />
+            </div>
+
+            <div style="display:grid; gap:8px;">
+              <label class="auth-label">Stock</label>
+              <input type="number" class="input" formControlName="stock" min="0" step="1" />
+            </div>
+
+            <div style="grid-column: 1 / -1; display:flex; align-items:center; gap:10px;">
+              <input id="activo" type="checkbox" formControlName="activo" />
+              <label class="auth-label" for="activo" style="margin:0;">Activo</label>
+            </div>
+          </div>
+
+          <div style="display:flex; gap:10px; margin-top:12px;">
+            <button class="btn-primary" type="submit" [disabled]="loading || form.invalid">
+              {{ loading ? 'Guardando…' : 'Guardar' }}
             </button>
+            <button class="btn-accion gray" type="button" (click)="cancelarForm()">Cancelar</button>
+          </div>
 
-            <button class="btn-accion blue" *ngIf="auth.canEdit()" (click)="actualizarStock(p)">Stock</button>
-            <button class="btn-accion gray" *ngIf="auth.canEdit()" (click)="editar(p)">Editar</button>
-            <button class="btn-accion red" *ngIf="auth.canDelete()" (click)="eliminar(p)">Eliminar</button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+          <div *ngIf="error" class="text-muted" style="margin-top:10px;">{{ error }}</div>
+        </form>
+      </div>
+      <!-- === /Formulario inline === -->
+
+      <!-- Tabla -->
+      <div class="productos-tabla" *ngIf="data.length > 0; else sinResultados">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Código</th>
+              <th>Nombre</th>
+              <th>Descripción</th>
+              <th class="text-end">Precio</th>
+              <th class="text-end">Stock</th>
+              <th>Estado</th>
+              <th class="text-end">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let p of data">
+              <td>{{ p.id }}</td>
+              <td>{{ p.codigo }}</td>
+              <td>{{ p.nombre }}</td>
+              <td>{{ p.descripcion }}</td>
+              <td class="text-end">{{ p.precio | number: '1.2-2' }}</td>
+              <td class="text-end">{{ p.stock }}</td>
+              <td>
+                <span [class.text-bg-success]="p.activo" [class.text-bg-secondary]="!p.activo">
+                  {{ p.activo ? 'Activo' : 'Inactivo' }}
+                </span>
+              </td>
+              <td class="text-end acciones">
+                <button class="btn-accion gray" (click)="editar(p)" *ngIf="auth.canEdit()">Editar</button>
+                <button class="btn-accion red" (click)="eliminar(p)" *ngIf="auth.canDelete()">Eliminar</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <ng-template #sinResultados>
+        <div class="text-muted center">Sin resultados.</div>
+      </ng-template>
+    </div>
   </div>
 </div>

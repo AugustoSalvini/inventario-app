@@ -1,34 +1,44 @@
 <div class="box">
+  <!-- título cambia según si es alta o edición -->
   <h2>{{ id ? 'Editar producto' : 'Nuevo producto' }}</h2>
 
   <p>Completá los datos y guardá para crear el producto.</p>
 
+  <!-- formulario reactivo de producto -->
   <form [formGroup]="form" (ngSubmit)="submit()">
+    <!-- código interno del producto -->
     <label>Código</label>
     <input formControlName="codigo" />
 
+    <!-- nombre visible del producto -->
     <label>Nombre</label>
     <input formControlName="nombre" />
 
+    <!-- descripción opcional -->
     <label>Descripción</label>
     <textarea formControlName="descripcion"></textarea>
 
+    <!-- precio numérico -->
     <label>Precio</label>
     <input type="number" formControlName="precio" />
 
+    <!-- cantidad en stock -->
     <label>Stock</label>
     <input type="number" formControlName="stock" />
 
+    <!-- marca si el producto está activo o no -->
     <label>
       <input type="checkbox" formControlName="activo" />
       Activo
     </label>
 
+    <!-- acciones principales del formulario -->
     <div class="buttons">
       <button type="submit" [disabled]="loading || form.invalid">Guardar</button>
       <button type="button" routerLink="/productos">Cancelar</button>
     </div>
   </form>
 
+  <!-- mensaje de error cuando algo falla -->
   <div *ngIf="error" class="error">{{ error }}</div>
 </div>

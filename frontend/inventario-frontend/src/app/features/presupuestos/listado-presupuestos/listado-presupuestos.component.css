@@ -1,106 +1,218 @@
-/* src/app/features/presupuestos/listado-presupuestos/listado-presupuestos.component.css */
+/* Estilos generales de la página de presupuestos */
 .page {
-  max-width: 980px;
+  max-width: 1100px;
   margin: 0 auto;
-  padding: 24px;
-  color: #e5e7eb;
+  padding: 32px;
+  color: #f4f6fa;
+  font-family: "Poppins", sans-serif;
+  background: transparent; /* mantengo el fondo oscuro del layout general */
 }
+
+/* Encabezado con título y botones */
 .page-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 24px;
 }
+
 .page-header h1 {
   font-size: 28px;
-  font-weight: 800;
-  margin: 0;
-  letter-spacing: 0.3px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: #00c853;
+  text-shadow: 0 0 6px rgba(0, 200, 83, 0.4);
 }
+
 .actions {
   display: flex;
-  gap: 10px;
+  gap: 12px;
   align-items: center;
 }
+
+/* Barra de búsqueda de presupuestos */
 .search-bar {
   display: flex;
   gap: 10px;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
 }
+
 .search-bar input {
   flex: 1;
-  height: 40px;
-  padding: 8px 12px;
-  border-radius: 10px;
-  border: 1px solid #2a2f3a;
-  background: #0b1220;
-  color: #e5e7eb;
+  height: 42px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: #11131b;
+  color: #f4f6fa;
   outline: none;
+  transition: all 0.25s ease;
+  box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.4);
 }
+
 .search-bar input:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25);
+  border-color: #00c853;
+  box-shadow: 0 0 10px rgba(0, 200, 83, 0.4);
 }
+
+/* Tabla de listado de presupuestos */
 table {
   width: 100%;
   border-collapse: collapse;
-  background: #0b1220;
-  border: 1px solid #1f2937;
+  background: #1a1d24;
   border-radius: 12px;
   overflow: hidden;
+  border: 1px solid #2a2f3a;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6);
 }
+
 thead th {
   text-align: left;
-  font-weight: 700;
-  padding: 12px 14px;
-  background: #0f172a;
-  border-bottom: 1px solid #1f2937;
-  color: #cbd5e1;
+  font-weight: 600;
+  padding: 14px;
+  background: #21252d;
+  color: #c9d0db;
+  border-bottom: 1px solid #2a2f3a;
 }
+
 tbody td {
-  padding: 12px 14px;
-  border-bottom: 1px solid #1f2937;
+  padding: 14px;
+  border-bottom: 1px solid #2a2f3a;
   vertical-align: middle;
+  color: #f4f6fa;
 }
-tbody tr:hover { background: #0f172a; }
-.text-end { text-align: end; }
-.muted { color: #9ca3af; margin-top: 8px; }
-.error { color: #fca5a5; font-weight: 700; margin-top: 8px; }
-.btn-primary, .btn-secondary, .btn-accion {
+
+tbody tr:hover {
+  background: rgba(255, 255, 255, 0.05);
+  transition: background 0.2s ease;
+}
+
+.text-end {
+  text-align: end;
+}
+
+/* Mensajes de estado (info / error) */
+.muted {
+  color: #c9d0db;
+  margin-top: 8px;
+}
+.error {
+  color: #ff3b30;
+  font-weight: 600;
+  margin-top: 8px;
+}
+
+/* Botones principales y de acciones */
+.btn-primary,
+.btn-secondary,
+.btn-accion {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   height: 40px;
   padding: 0 14px;
   border-radius: 10px;
-  border: 0;
-  cursor: pointer;
+  border: none;
   font-weight: 600;
-  text-decoration: none;
+  cursor: pointer;
   user-select: none;
+  transition: all 0.25s ease;
 }
-.btn-primary { background: #2563eb; color: #fff; }
-.btn-primary:hover { filter: brightness(1.1); }
-.btn-secondary { background: #1f2937; color: #e5e7eb; }
-.btn-secondary:hover { filter: brightness(1.05); }
+
+/* Botón principal (Nuevo, Buscar, Guardar, etc.) */
+.btn-primary {
+  background: linear-gradient(90deg, #2d6df6, #4e8dfd);
+  color: #fff;
+  box-shadow: 0 0 10px rgba(45, 109, 246, 0.4);
+}
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 16px rgba(45, 109, 246, 0.6);
+}
+
+/* Botón secundario (volver, cancelar, etc.) */
+.btn-secondary {
+  background: #2a2a2a;
+  color: #f4f6fa;
+}
+.btn-secondary:hover {
+  background: #3c3c3c;
+}
+
+/* Botones de acciones dentro de la tabla */
 .btn-accion {
-  background: #111827; color: #e5e7eb; padding: 8px 12px; height: auto; border-radius: 8px;
-  margin-left: 6px;
+  padding: 6px 10px;
+  height: auto;
+  border-radius: 6px;
+  color: #f4f6fa;
 }
-.btn-accion.gray { background: #1f2937; }
-.btn-accion.red  { background: #b91c1c; }
-.btn-accion:hover { filter: brightness(1.08); }
-.badge { padding: 4px 8px; border-radius: 8px; font-size: 12px; display: inline-block; }
-.badge.warn { background: #1f2937; color: #e5e7eb; }
-.badge.success { background: #14532d; color: #bbf7d0; }
-.badge.danger { background: #450a0a; color: #fecaca; }
+.btn-accion.gray {
+  background: #3a3a3a;
+}
+.btn-accion.red {
+  background: #e53935;
+}
+.btn-accion:hover {
+  transform: scale(1.05);
+  filter: brightness(1.1);
+}
+
+/* Estilos visuales para los estados de los presupuestos */
+.badge.info {
+  background: rgba(33, 150, 243, 0.18);
+  color: #64b5f6;
+  text-shadow: 0 0 6px rgba(100, 181, 246, 0.45);
+  border: 1px solid rgba(100, 181, 246, 0.25);
+}
+
+.badge.expired {
+  background: rgba(255, 152, 0, 0.18);
+  color: #ffb74d;
+  text-shadow: 0 0 6px rgba(255, 183, 77, 0.45);
+  border: 1px solid rgba(255, 183, 77, 0.25);
+}
+
+.badge.warn {
+  background: #333;
+  color: #babd04;
+}
+.badge.success {
+  background: rgba(0, 200, 83, 0.2);
+  color: #0cf73f;
+  text-shadow: 0 0 6px rgba(0, 200, 83, 0.5);
+}
+.badge.danger {
+  background: rgba(238, 46, 36, 0.2);
+  color: #ee2828;
+  text-shadow: 0 0 6px rgba(255, 59, 48, 0.5);
+}
+
+/* Versión responsive para móvil (tabla apilada) */
 @media (max-width: 720px) {
-  .page { padding: 16px; }
-  thead { display: none; }
-  table, tbody, tr, td { display: block; width: 100%; }
-  tbody tr { margin-bottom: 12px; border: 1px solid #1f2937; border-radius: 10px; overflow: hidden; }
-  tbody td { border: 0; padding: 10px 12px; }
+  .page {
+    padding: 16px;
+  }
+  thead {
+    display: none;
+  }
+  table,
+  tbody,
+  tr,
+  td {
+    display: block;
+    width: 100%;
+  }
+  tbody tr {
+    margin-bottom: 12px;
+    border: 1px solid #2a2f3a;
+    border-radius: 10px;
+    background: #1a1d24;
+  }
+  tbody td {
+    border: 0;
+    padding: 10px 12px;
+  }
   tbody td::before {
     content: attr(data-label);
     display: block;
@@ -108,4 +220,49 @@ tbody tr:hover { background: #0f172a; }
     color: #9ca3af;
     margin-bottom: 4px;
   }
+}
+
+/* Botón "Volver a productos" con estilo específico */
+.btn-secondary {
+  background: linear-gradient(90deg, #2a2a2a 0%, #3c3c3c 100%);
+  color: #f4f6fa;
+  padding: 0 18px;
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: none;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.4);
+  transition: all 0.25s ease;
+}
+
+.btn-secondary:hover {
+  background: linear-gradient(90deg, #3d3d3d 0%, #505050 100%);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.15);
+  transform: translateY(-2px);
+}
+
+/* Botón Buscar dentro de la barra de búsqueda */
+.search-bar .btn-primary {
+  flex-shrink: 0;
+  width: auto;
+  padding: 0 20px;
+  height: 42px;
+  white-space: nowrap;
+  background: linear-gradient(90deg, #2d6df6, #4e8dfd);
+  color: #fff;
+  font-weight: 600;
+  border-radius: 10px;
+  border: none;
+  box-shadow: 0 0 8px rgba(45, 109, 246, 0.4);
+  transition: all 0.25s ease;
+}
+
+.search-bar .btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 15px rgba(45, 109, 246, 0.6);
 }

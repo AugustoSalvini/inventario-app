@@ -3,8 +3,9 @@ import { Routes } from '@angular/router';
 
 import { LoginComponent } from './auth/login/login.component';
 import { RegisterComponent } from './auth/register/register.component';
-import { ProductosComponent } from './productos.component';        // tu productos standalone
+import { ProductosComponent } from './productos.component';
 import { AuthGuard } from './core/guards/auth.guard';
+import { notUserGuard } from './core/guards/not-user.guard';
 
 // Clientes
 import { ListadoClientesComponent } from './features/clientes/listado-clientes/listado-clientes.component';
@@ -18,17 +19,23 @@ export const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
 
+  // Productos (todos los roles logueados)
   { path: 'productos', component: ProductosComponent, canActivate: [AuthGuard] },
 
-  // Clientes
+  // Clientes (user no debería usarlos, pero eso ya lo manejás visualmente)
   { path: 'clientes', component: ListadoClientesComponent, canActivate: [AuthGuard] },
   { path: 'clientes/nuevo', component: EditarClienteComponent, canActivate: [AuthGuard] },
   { path: 'clientes/:id/editar', component: EditarClienteComponent, canActivate: [AuthGuard] },
 
-  // Presupuestos
-  { path: 'presupuestos', component: ListadoPresupuestosComponent, canActivate: [AuthGuard] },
+  // 🔒 Presupuestos:
+  // ➤ Listado: SOLO empleado/admin
+  { path: 'presupuestos', component: ListadoPresupuestosComponent, canActivate: [AuthGuard, notUserGuard] },
+
+  // ➤ Crear nuevo: CUALQUIER usuario logueado (user, empleado, admin)
   { path: 'presupuestos/nuevo', component: EditarPresupuestoComponent, canActivate: [AuthGuard] },
-  { path: 'presupuestos/:id/editar', component: EditarPresupuestoComponent, canActivate: [AuthGuard] },
+
+  // ➤ Editar: SOLO empleado/admin
+  { path: 'presupuestos/:id/editar', component: EditarPresupuestoComponent, canActivate: [AuthGuard, notUserGuard] },
 
   { path: '', pathMatch: 'full', redirectTo: 'login' },
   { path: '**', redirectTo: 'login' },

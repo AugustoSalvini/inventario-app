@@ -14,10 +14,12 @@ import { AuthService } from './core/services/auth.service';
   styleUrls: ['./producto-form.component.css'],
 })
 export class ProductoFormComponent {
+  // id del producto si estamos editando
   id?: number;
   loading = false;
   error = '';
 
+  // formulario reactivo para el producto
   form!: FormGroup;
 
   constructor(
@@ -27,7 +29,7 @@ export class ProductoFormComponent {
     private api: ProductosApi,
     public auth: AuthService
   ) {
-    // 🧩 Inicializamos el formulario con todos los campos de la tabla
+    // creo el formulario con los campos que tiene la tabla de productos
     this.form = this.fb.group({
       codigo: ['', [Validators.required]],
       nombre: ['', [Validators.required]],
@@ -37,10 +39,11 @@ export class ProductoFormComponent {
       activo: [true],
     });
 
+    // obtengo el id de la ruta (si existe) para saber si es edición
     const rawId = this.route.snapshot.paramMap.get('id');
     this.id = rawId ? Number(rawId) : undefined;
 
-    // Si es edición, cargamos los datos
+    // si hay id, traigo el producto del backend y completo el formulario
     if (this.id) {
       this.loading = true;
       this.api.show(this.id).subscribe({
@@ -64,23 +67,27 @@ export class ProductoFormComponent {
   }
 
   submit() {
-  if (this.form.invalid) return;
-  this.loading = true;
+    // si el formulario no es válido no hago nada
+    if (this.form.invalid) return;
+    this.loading = true;
 
-  const raw = this.form.value;
-  const payload = {
-    ...raw,
-    precio: Number(raw.precio),
-    stock: Number(raw.stock),
-    activo: !!raw.activo
-  } as Partial<Producto>;
+    // preparo el payload asegurando tipos correctos
+    const raw = this.form.value;
+    const payload = {
+      ...raw,
+      precio: Number(raw.precio),
+      stock: Number(raw.stock),
+      activo: !!raw.activo
+    } as Partial<Producto>;
 
-  const obs = this.id ? this.api.update(this.id, payload)
-                      : this.api.create(payload);
+    // si hay id actualizo, si no creo un producto nuevo
+    const obs = this.id ? this.api.update(this.id, payload)
+                        : this.api.create(payload);
 
-  obs.subscribe({
-    next: () => { this.loading = false; this.router.navigate(['/productos']); },
-    error: () => { this.error = this.id ? 'No se pudo actualizar' : 'No se pudo crear el producto'; this.loading = false; }
-  });
+    // ejecuto la petición y vuelvo a la lista de productos si sale bien
+    obs.subscribe({
+      next: () => { this.loading = false; this.router.navigate(['/productos']); },
+      error: () => { this.error = this.id ? 'No se pudo actualizar' : 'No se pudo crear el producto'; this.loading = false; }
+    });
   }
 }

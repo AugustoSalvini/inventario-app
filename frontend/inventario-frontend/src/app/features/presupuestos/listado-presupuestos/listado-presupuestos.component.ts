@@ -14,10 +14,23 @@ import { AuthService } from '../../../core/services/auth.service';
   styleUrls: ['./listado-presupuestos.component.css'],
 })
 export class ListadoPresupuestosComponent implements OnInit {
-  q = '';
+  // ✅ hacemos q reactivo sin tocar el HTML
+  private _q = '';
+  get q(): string { return this._q; }
+  set q(value: string) {
+    this._q = value ?? '';
+    // debounce suave para no recalcular por cada tecla
+    clearTimeout(this.debounceTimer);
+    this.debounceTimer = setTimeout(() => {
+      this.applySearch(this._q);
+    }, 200);
+  }
+
   data: Presupuesto[] = [];
+  allData: Presupuesto[] = []; // lista completa para restaurar al borrar
   loading = false;
   error = '';
+  private debounceTimer: any;
 
   constructor(
     private api: PresupuestosApi,
@@ -25,18 +38,61 @@ export class ListadoPresupuestosComponent implements OnInit {
     private router: Router
   ) {}
 
-  ngOnInit(): void { this.fetch(); }
+  ngOnInit(): void {
+    this.fetch();
+  }
 
+  /** Carga todos los presupuestos (sin filtro en el back) */
   fetch(): void {
     this.loading = true;
-    this.api.list(this.q).subscribe({
-      next: (res) => { this.data = res.data; this.loading = false; },
-      error: () => { this.error = 'No se pudieron cargar los presupuestos'; this.loading = false; }
+    this.api.list('' /* siempre sin q para evitar 500 */).subscribe({
+      next: (res) => {
+        this.allData = res.data || [];
+        // si hay término ya tipeado, lo aplicamos; si no, mostramos todo
+        this.applySearch(this._q);
+        this.loading = false;
+        this.error = '';
+      },
+      error: () => {
+        this.error = 'No se pudieron cargar los presupuestos';
+        this.loading = false;
+      }
     });
   }
 
-  buscar(): void { this.fetch(); }
+  /** Click en “Buscar” o Enter: fuerza aplicar el término actual */
+  buscar(): void {
+    this.applySearch(this._q);
+  }
 
+  /** Aplica búsqueda o restaura la lista completa */
+  private applySearch(value: string): void {
+    const term = (value || '').trim();
+    if (term === '') {
+      this.data = [...this.allData];
+    } else {
+      this.data = this.localFilter(this.allData, term);
+    }
+  }
+
+  /** Filtro local: por id, cliente, estado o total (sin tildes, case-insensitive) */
+  private localFilter(rows: Presupuesto[], term: string): Presupuesto[] {
+    const normalize = (s: string) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    const t = normalize(term.trim().toLowerCase());
+    const idNum = Number(t);
+    const isNumeric = !isNaN(idNum);
+
+    return rows.filter(p => {
+      const byId = isNumeric && p.id === idNum;
+      const clienteNombre = normalize(p.cliente?.nombre || '').toLowerCase();
+      const byCliente = clienteNombre.includes(t);
+      const byEstado = normalize(p.estado || '').toLowerCase().includes(t);
+      const byTotal = (p.total ?? '').toString().toLowerCase().includes(t);
+      return byId || byCliente || byEstado || byTotal;
+    });
+  }
+
+  /** Acciones */
   nuevo(): void {
     if (!this.auth.canEdit()) return;
     this.router.navigate(['/presupuestos/nuevo']);

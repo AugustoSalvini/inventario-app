@@ -16,6 +16,7 @@ class ProductoController extends Controller
             $q = trim((string) $request->query('q', ''));
             $query = Producto::query();
 
+            // filtro de búsqueda por nombre, código o id
             if ($q !== '') {
                 $query->where(function ($sub) use ($q) {
                     $sub->where('nombre', 'ilike', "%{$q}%")
@@ -41,7 +42,7 @@ class ProductoController extends Controller
     public function store(Request $request)
     {
         try {
-            // ✅ VALIDACIÓN SÓLO DE PRODUCTOS
+            // validación de los campos del producto
             $data = $request->validate([
                 'codigo'      => ['nullable','string','max:50','unique:productos,codigo'],
                 'nombre'      => ['required','string','max:255'],
@@ -51,7 +52,7 @@ class ProductoController extends Controller
                 'activo'      => ['boolean'],
             ]);
 
-            // Normalizaciones
+            // normalizo tipos por las dudas
             $data['precio'] = (float) $data['precio'];
             $data['stock']  = (int)   $data['stock'];
             $data['activo'] = (bool) ($data['activo'] ?? true);
@@ -62,7 +63,7 @@ class ProductoController extends Controller
         } catch (ValidationException $ve) {
             return response()->json(['errors' => $ve->errors()], 422);
         } catch (QueryException $e) {
-            // clave única (pgsql)
+            // manejo específico del error de código duplicado
             if ($e->getCode() === '23505') {
                 return response()->json(['message' => 'El código ya existe'], 422);
             }
@@ -77,6 +78,7 @@ class ProductoController extends Controller
     public function update(Request $request, Producto $producto)
     {
         try {
+            // validación parcial para actualización
             $data = $request->validate([
                 'codigo'      => ['sometimes','string','max:50','unique:productos,codigo,'.$producto->id],
                 'nombre'      => ['sometimes','string','max:255'],
@@ -86,6 +88,7 @@ class ProductoController extends Controller
                 'activo'      => ['sometimes','boolean'],
             ]);
 
+            // normalización solo de los campos presentes
             if (isset($data['precio'])) $data['precio'] = (float) $data['precio'];
             if (isset($data['stock']))  $data['stock']  = (int)   $data['stock'];
             if (isset($data['activo'])) $data['activo'] = (bool)  $data['activo'];
@@ -104,6 +107,7 @@ class ProductoController extends Controller
     public function updateStock(Request $request, Producto $producto)
     {
         try {
+            // endpoint dedicado a actualizar solo el stock
             $data = $request->validate([
                 'stock' => ['required','integer','min:0'],
             ]);
@@ -122,6 +126,7 @@ class ProductoController extends Controller
     public function destroy(Producto $producto)
     {
         try {
+            // borrado lógico/físico del producto según el modelo
             $producto->delete();
             return response()->json(['ok' => true]);
         } catch (\Throwable $e) {

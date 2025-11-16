@@ -1,37 +1,241 @@
-/* src/app/features/presupuestos/editar-presupuesto/editar-presupuesto.component.css */
-.page { max-width: 980px; margin: 0 auto; padding: 24px; color: #e5e7eb; }
-.page-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
-.page-header h1 { font-size:28px; font-weight:800; margin:0; letter-spacing:.3px; }
-
-.grid-2 { display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:12px; }
-label { display:block; font-size:13px; color:#9ca3af; margin-bottom:6px; }
-input, select, textarea {
-  width:100%; height:40px; padding:8px 12px; border-radius:10px; border:1px solid #2a2f3a;
-  background:#0b1220; color:#e5e7eb; outline:none;
+/* Fondo general de la página de presupuestos */
+.page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 32px;
+  color: #f4f6fa;
+  font-family: "Poppins", sans-serif;
 }
-textarea { height:auto; }
 
+/* Encabezado con título y acciones */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.page-header h1 {
+  font-size: 28px;
+  font-weight: 700;
+  color: #00c853;
+  text-shadow: 0 0 6px rgba(0, 200, 83, 0.4);
+}
+
+/* Botón secundario (volver, cancelar, etc.) */
+.btn-secondary {
+  background: linear-gradient(90deg, #2a2a2a, #3c3c3c);
+  color: #f4f6fa;
+  padding: 0 18px;
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  font-weight: 600;
+  text-decoration: none;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.4);
+  transition: all 0.25s ease;
+}
+.btn-secondary:hover {
+  background: linear-gradient(90deg, #3d3d3d, #505050);
+  transform: translateY(-2px);
+}
+
+/* Contenedor principal del formulario */
+form {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  padding: 24px;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 35px 80px rgba(0, 0, 0, 0.45);
+}
+
+/* Layout de dos columnas para los campos de arriba */
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+@media (max-width: 720px) {
+  .grid-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+label {
+  display: block;
+  margin-bottom: 6px;
+  color: #c9d0db;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+/* Estilo general de inputs, selects y textarea */
+input[type="number"],
+input[type="text"],
+select,
+textarea {
+  width: 100%;
+  height: 42px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: #11131b;
+  color: #f4f6fa;
+  box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.4);
+  transition: all 0.25s ease;
+}
+
+textarea {
+  height: auto;
+  resize: vertical;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #c9d0db;
+  opacity: 0.8;
+  font-size: 14px;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: #00c853;
+  box-shadow: 0 0 6px rgba(0, 200, 83, 0.3);
+}
+
+/* Estilo del título de la sección de ítems */
+h3 {
+  margin-top: 28px;
+  color: #00c853;
+  font-weight: 700;
+  font-size: 20px;
+}
+
+/* Cada fila de ítem del presupuesto */
 .item-row {
-  display:grid;
-  grid-template-columns: 140px 1fr 120px 140px 100px;
-  gap:10px; margin-bottom:10px; align-items:center;
+  display: grid;
+  grid-template-columns: 150px 1fr 120px 160px 100px;
+  gap: 10px;
+  background: #1a1d24;
+  border: 1px solid #2a2f3a;
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 10px;
+  transition: all 0.25s ease;
+}
+.item-row:hover {
+  background: rgba(255, 255, 255, 0.06);
 }
 
-.actions { display:flex; gap:10px; align-items:center; }
-.mt { margin-top:12px; }
-.error { color:#fca5a5; font-weight:700; }
-
-.btn-primary, .btn-secondary, .btn-accion {
-  display:inline-flex; align-items:center; justify-content:center; height:40px; padding:0 14px;
-  border-radius:10px; border:0; cursor:pointer; font-weight:600; text-decoration:none; user-select:none;
+/* Botones de acción dentro de los ítems (Agregar/Quitar) */
+.btn-accion {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 38px;
+  padding: 0 14px;
+  border-radius: 8px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.25s ease;
 }
-.btn-primary{ background:#2563eb; color:#fff; }
-.btn-secondary{ background:#1f2937; color:#e5e7eb; }
-.btn-accion{ background:#111827; color:#e5e7eb; padding:8px 12px; height:auto; border-radius:8px; }
-.btn-accion.blue{ background:#1d4ed8; }
-.btn-accion.red{ background:#b91c1c; }
 
-@media (max-width: 860px) {
-  .grid-2 { grid-template-columns: 1fr; }
-  .item-row { grid-template-columns: 1fr; }
+/* Botón para quitar ítem */
+.btn-accion.red {
+  background: #b71c1c;
+  color: #fff;
+}
+.btn-accion.red:hover {
+  background: #d32f2f;
+  transform: translateY(-1px);
+}
+
+/* Botón para agregar ítem */
+.btn-accion.blue {
+  background: #283593;
+  color: #f4f6fa;
+  border-radius: 10px;
+  height: 38px;
+  padding: 0 14px;
+  transition: all 0.25s ease;
+}
+.btn-accion.blue:hover {
+  background: #3949ab;
+  transform: translateY(-1px);
+}
+
+/* Contenedor de los botones principales (guardar/cancelar) */
+.actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  align-items: center;
+  margin-top: 24px;
+}
+
+/* Botón principal (guardar/enviar presupuesto) */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  padding: 0 16px;
+  border-radius: 10px;
+  border: none;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  background: #1e40af;
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+.btn-primary:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+}
+
+/* Botón secundario (mismo estilo general) */
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  padding: 0 16px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.25s ease;
+  background: linear-gradient(90deg, #2a2a2a, #3c3c3c);
+  color: #f4f6fa;
+}
+.btn-secondary:hover {
+  background: linear-gradient(90deg, #3d3d3d, #505050);
+  transform: translateY(-1px);
+}
+
+/* Mensaje de error debajo del formulario */
+.error {
+  margin-top: 10px;
+  color: #ff3b30;
+  font-weight: 600;
+}
+
+/* Saco las flechas de los inputs numéricos en navegadores WebKit */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Alineo a la derecha los campos numéricos con inputmode decimal */
+input[inputmode="decimal"] {
+  text-align: right;
 }

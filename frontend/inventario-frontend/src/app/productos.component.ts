@@ -3,7 +3,7 @@ import { CommonModule, DecimalPipe } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 
-import { AuthService } from './core/services/auth.service';
+import { AuthService } from './core/services/auth.service'; // ✅ RUTA CORRECTA
 import { ProductosApi, Producto } from './productos.api';
 
 @Component({
@@ -52,15 +52,19 @@ export class ProductosComponent implements OnInit {
 
   buscar(): void { this.fetch(); }
 
+  /** Crear producto → SOLO ADMIN */
   nuevo(): void {
-    if (!this.auth.canEdit()) return;
+    if (this.auth.getRole() !== 'admin') return;
     this.editingId = null;
     this.form.reset({ codigo: '', nombre: '', descripcion: '', precio: 0, stock: 0, activo: true });
     this.showForm = true;
   }
 
+  /** Editar producto → ADMIN + EMPLEADO ✅ */
   editar(p: Producto): void {
+    // 🔁 CAMBIO: antes chequeaba solo admin, ahora usamos canEdit()
     if (!this.auth.canEdit()) return;
+
     this.editingId = p.id;
     this.form.reset({
       codigo:      p.codigo ?? '',
@@ -84,8 +88,19 @@ export class ProductosComponent implements OnInit {
     return Number(String(x).replace(/\./g, '').replace(',', '.'));
   }
 
+  /** Guardar (crear/actualizar) */
   submit(): void {
-    if (this.form.invalid || !this.auth.canEdit()) return;
+    if (this.form.invalid) return;
+
+    const role = this.auth.getRole();
+    const isEdit = this.editingId !== null;
+
+    // ✅ Crear: SOLO admin
+    if (!isEdit && role !== 'admin') return;
+
+    // ✅ Editar: admin + empleado
+    if (isEdit && !this.auth.canEdit()) return;
+
     this.loading = true;
     this.error = '';
 
@@ -94,7 +109,7 @@ export class ProductosComponent implements OnInit {
       codigo:      v.codigo?.trim() || null,
       nombre:      v.nombre.trim(),
       descripcion: (v.descripcion || '').trim() || null,
-      precio:      this.parseDecimal(v.precio),  // 👈 normaliza punto/coma
+      precio:      this.parseDecimal(v.precio),
       stock:       Number(v.stock),
       activo:      !!v.activo,
     };
@@ -113,7 +128,6 @@ export class ProductosComponent implements OnInit {
       error: (err) => {
         this.loading = false;
 
-        // Manejo de errores del backend (422, etc.)
         const be = err?.error;
         if (be?.errors) {
           const first = Object.values(be.errors)[0] as string[];
@@ -129,6 +143,7 @@ export class ProductosComponent implements OnInit {
     });
   }
 
+  /** Eliminar → SOLO ADMIN */
   eliminar(p: Producto): void {
     if (!this.auth.canDelete()) return;
     if (!confirm(`¿Eliminar "${p.nombre}"?`)) return;
@@ -138,6 +153,7 @@ export class ProductosComponent implements OnInit {
     });
   }
 
+  /** Actualizar stock → ADMIN o EMPLEADO */
   actualizarStock(p: Producto): void {
     if (!this.auth.canEdit()) return;
     const val = prompt(`Nuevo stock para "${p.nombre}"`, String(p.stock ?? 0));

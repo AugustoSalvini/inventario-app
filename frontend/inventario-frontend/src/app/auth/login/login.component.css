@@ -1,1 +1,202 @@
-.bg-login{background:linear-gradient(135deg,#f7f9fc,#e9eefc);} .form-card{width:360px;border-radius:12px;}
+/* Fuentes principales usadas en la app */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Rubik+Dirt&display=swap'); /* fuente especial para el título si la necesito */
+
+/* Paleta de colores y estilos base del módulo de auth */
+:host {
+  --primary: #3b82f6;          
+  --secondary: #22c55e;         
+  --danger: #dc2626;            
+  --text-color: #e8edf3;        
+  --muted: #9aa4b2;             
+  --glass-bg: rgba(20, 24, 30, 0.55);   
+  --glass-border: rgba(255, 255, 255, 0.14);
+  --shadow: 0 35px 80px rgba(0,0,0,.45);
+
+  font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+}
+
+/* Layout general de la pantalla de login/register */
+.auth-layout {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: url("https://images.pexels.com/photos/4483610/pexels-photo-4483610.jpeg") center/cover no-repeat;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Capa oscura sobre la imagen de fondo para mejorar contraste */
+.auth-layout::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 60% 40%, rgba(0,0,0,0.12), rgba(0,0,0,0.75)),
+    linear-gradient(180deg, rgba(10,12,16,.35), rgba(10,12,16,.65));
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Tarjeta principal del formulario de autenticación */
+.auth-card {
+  position: relative;
+  z-index: 2;
+  width: min(90vw, 460px);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: var(--shadow);
+  padding: 38px 32px;
+  color: var(--text-color);
+  text-align: center;
+}
+
+/* Título principal de la app (Inventario App) */
+.app-title { 
+  font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; 
+  font-weight: 800; 
+  letter-spacing: .8px; 
+  text-transform: none; 
+}
+
+/* Encabezado del formulario (Ingresar / Crear cuenta) */
+.h1 {
+  font-weight: 800;
+  font-size: 30px;
+  margin-bottom: 10px;
+  color: #ffffff;
+  letter-spacing: .4px;
+}
+
+/* Subtítulo con breve explicación */
+.subtitle {
+  font-size: 10px;
+  color: #0b1117;
+  background: rgba(42, 156, 209, 0.88);
+  padding: 6px 14px;
+  border-radius: 10px;
+  display: inline-block;
+  margin-bottom: 22px;
+  font-weight: 600;
+}
+
+/* Estilo general de los inputs del formulario */
+.input {
+  width: 100%;
+  height: 46px;
+  border-radius: 999px;
+  border: 1px solid rgba(36, 48, 65, 0.8);
+  background: rgba(18, 23, 30, 0.92);
+  color: #5190c7;
+  padding: 10px 16px;
+  font-size: 15px;
+  outline: none;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.06),
+    0 8px 16px rgba(0,0,0,.15);
+  transition: border 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+.input::placeholder { 
+  color: var(--muted); 
+}
+.input:focus {
+  border-color: var(--primary);
+  background: rgba(18, 23, 30, 0.98);
+  box-shadow: 0 0 0 4px rgba(59,130,246,0.25), 0 8px 20px rgba(0, 0, 0, 0.25);
+}
+
+/* Botón principal de acción (Ingresar / Registrar) */
+.btn-primary {
+  width: 100%;
+  height: 50px;
+  margin-top: 14px;
+  border-radius: 999px;
+  border: none;
+  background: var(--primary);
+  color: #ffffff;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  box-shadow: 0 14px 28px rgba(59,130,246,0.28);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.btn-primary:hover {
+  background: #4f8ffd;
+  transform: translateY(-2px);
+  box-shadow: 0 18px 40px rgba(59,130,246,0.32);
+}
+.btn-primary:active { 
+  transform: translateY(0); 
+}
+
+/* Pie de la tarjeta con link para cambiar entre login y register */
+.auth-footer { 
+  margin-top: 16px; 
+}
+
+/* Enlaces para navegar entre pantallas de auth */
+.auth-link {
+  color: #049e56;
+  opacity: 0.9;
+  font-size: 13px;
+  text-decoration: none;
+  transition: opacity 0.2s ease, color 0.2s ease, text-shadow 0.2s ease;
+}
+.auth-link:hover {
+  color: #dbe7ff;
+  opacity: 1;
+  text-shadow: 0 0 10px rgba(180,200,255,0.28);
+}
+
+/* Estilo para mensajes de error del formulario */
+[style*="color:#b42318"] {
+  color: #da1c1c !important;
+  background: rgba(220, 38, 38, 0.12);
+  border: 1px solid rgba(220, 38, 38, 0.28);
+  border-radius: 10px;
+  padding: 8px 10px;
+  margin-top: 10px;
+}
+
+/* Estilo para mensajes de éxito o información positiva */
+[style*="color:#046c4e"],
+[ng-reflect-ng-if="message"] {
+  color: #07993f !important;
+  background: rgba(34, 197, 94, 0.12);
+  border: 1px solid rgba(34, 197, 94, 0.28);
+  border-radius: 10px;
+  padding: 8px 10px;
+  margin-top: 10px;
+}
+
+/* Ajustes para pantallas pequeñas en móviles */
+@media (max-width: 480px) {
+  .app-title { 
+    font-size: 44px; 
+    transform: none; 
+  }
+  .auth-card { 
+    padding: 28px; 
+  }
+}
+
+/* Logo de la app en la pantalla de autenticación */
+.app-logo {
+  width: 420px;
+  height: auto;
+  display: block;
+  margin: 12px auto -80px;
+  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.4)) brightness(1.1);
+  transition: transform .25s ease, filter .25s ease;
+}
+
+.app-logo:hover {
+  transform: scale(1.03);
+  filter: drop-shadow(0 6px 18px rgba(0,0,0,0.5)) brightness(1.2);
+}

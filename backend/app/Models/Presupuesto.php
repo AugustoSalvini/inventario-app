@@ -14,7 +14,7 @@ class Presupuesto extends Model
     protected $fillable = [
         'user_id',
         'cliente_id',
-        'estado',     // 'borrador' | 'confirmado' | 'cancelado'
+        'estado',
         'total',
         'notas',
     ];
@@ -38,7 +38,6 @@ class Presupuesto extends Model
         return $this->hasMany(PresupuestoItem::class);
     }
 
-    /** ✅ Método para recalcular el total del presupuesto */
     public function recalcularTotal(): void
     {
         $this->total = $this->items()->sum('subtotal');
