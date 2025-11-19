@@ -7,26 +7,26 @@ Este proyecto corresponde al Trabajo Final Integrador de las materias Programaci
 
 ### 1. Desarrollo de una Aplicación Funcional
 
-✔️ Aplicación web con arquitectura cliente-servidor (Frontend / Backend)
-✔️ Validación completa para inicio de sesión y registro de usuarios
-✔️ Gestión de productos: crear, listar, actualizar y eliminar
-✔️ Gestión de presupuestos según rol del usuario
-✔️ Generación de tokens para autenticación (Laravel Sanctum)
-✔️ Uso de Eloquent ORM
-✔️ Implementación de API REST propia, sin APIs externas
-✔️ Base de datos PostgreSQL, correctamente normalizada
-✔️ Manejo de roles y permisos en todas las vistas
+- ✔️ Aplicación web con arquitectura cliente-servidor (Frontend / Backend)
+- ✔️ Validación completa para inicio de sesión y registro de usuarios
+- ✔️ Gestión de productos: crear, listar, actualizar y eliminar
+- ✔️ Gestión de presupuestos según rol del usuario
+- ✔️ Generación de tokens para autenticación (Laravel Sanctum)
+- ✔️ Uso de Eloquent ORM
+- ✔️ Implementación de API REST propia, sin APIs externas
+- ✔️ Base de datos PostgreSQL, correctamente normalizada
+- ✔️ Manejo de roles y permisos en todas las vistas
 
 ---
 
 ## 🧪 Información sobre el Sistema
 
-🏗️ Arquitectura separada en Frontend (Angular) y Backend (Laravel)
-🔒 Seguridad: encriptación de contraseñas con bcrypt y rutas protegidas con middlewares
-🧱 Relaciones claras entre usuarios, productos, clientes y presupuestos
-🧬 Uso del ORM Eloquent para todas las consultas y relaciones
-📂 Control de versiones utilizando correctamente Git y GitHub
-📡 Comunicación entre Angular y Laravel mediante servicios HTTP y tokens
+- 🏗️ Arquitectura separada en Frontend (Angular) y Backend (Laravel)
+- 🔒 Seguridad: encriptación de contraseñas con bcrypt y rutas protegidas con middlewares
+- 🧱 Relaciones claras entre usuarios, productos, clientes y presupuestos
+- 🧬 Uso del ORM Eloquent para todas las consultas y relaciones
+- 📂 Control de versiones utilizando correctamente Git y GitHub
+- 📡 Comunicación entre Angular y Laravel mediante servicios HTTP y tokens
 
 ---
 
